@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PlanBoost{% endblock title %}</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/tasks/">Tasks</a>
+            <a href="/notes/">Notes</a>
+            <a href="/timer/">Timer</a>
+        </nav>
+    </header>
+    <h1>{% block title_h1 %}PlanBoost{% endblock title_h1 %}</h1>
+    <div>
+        {% block content %}{% endblock content %}
+    </div>
+    <footer>
+        PlanBoost © 2026
+    </footer>
+</body>
+</html>
