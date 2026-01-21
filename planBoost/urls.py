@@ -19,5 +19,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('dashboard.urls')),
+    path('', include(('dashboard.urls', 'dashboard'), namespace='dashboard')),
+    path('notes/', include(('notes.urls', 'notes'), namespace='notes')),
+    path('tasks/', include(('tasks.urls', 'tasks'), namespace='tasks')),
+    path('timer/', include(('timer.urls', 'timer'), namespace='timer')),
 ]
