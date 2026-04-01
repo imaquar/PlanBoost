@@ -42,7 +42,7 @@ class RegisterView(generic.CreateView):
         if form.is_valid():
             form.save()
 
-            return redirect(to='login')
+            return redirect(to='users:login')
 
         return render(request, self.template_name, {'form': form})
     
