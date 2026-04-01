@@ -128,5 +128,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = "/users/login/"
+LOGIN_URL = '/users/login/'
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = 'media/'
