@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title_h1 %}{% endblock title_h1 %}
+{% block content %}
+    <div>
+        <img src="{{ user.profile.avatar.url }} " style="cursor: pointer;"/>
+    </div>
+    {% if user_form.errors %}
+        <div role="alert">
+            <div>
+                {% for key, value in user_form.errors.items %}
+                    <strong>{{ value }}</strong>
+                {% endfor %}
+            </div>
+            <button type="button" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    <div class="form-content">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div>
+                <div>
+                    <div>
+                        <label>Username:</label>
+                        {{ user_form.username }}
+                    </div>
+                    <hr>
+                    <div><a href="{% url 'users:password_change' %}">Change Password</a>
+                        <hr>
+                        <label>Change Avatar:</label>
+                        {{ profile_form.avatar }}
+                    </div>
+                    <hr>
+                </div>
+            </div>
+            <br><br>
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <a href="#" onclick="parentNode.submit();">log out</a>
+    </form>
+{% endblock content %}
