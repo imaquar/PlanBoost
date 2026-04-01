@@ -125,3 +125,8 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = "/users/login/"
+
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
