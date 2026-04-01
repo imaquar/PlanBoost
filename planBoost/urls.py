@@ -23,4 +23,5 @@ urlpatterns = [
     path('notes/', include(('notes.urls', 'notes'), namespace='notes')),
     path('tasks/', include(('tasks.urls', 'tasks'), namespace='tasks')),
     path('timer/', include(('timer.urls', 'timer'), namespace='timer')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
