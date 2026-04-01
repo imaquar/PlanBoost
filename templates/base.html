@@ -7,18 +7,27 @@
     <title>{% block title %}PlanBoost{% endblock title %}</title>
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/tasks/">Tasks</a>
-            <a href="/notes/">Notes</a>
-            <a href="/timer/">Timer</a>
-        </nav>
-    </header>
+    {% block header %}
+        <header>
+            <nav>
+                <a href="/">Dashboard</a>
+                <a href="/tasks/">Tasks</a>
+                <a href="/notes/">Notes</a>
+                <a href="/timer/">Timer</a>
+            </nav>
+        </header>
+    {% endblock header %}
     <h1>{% block title_h1 %}PlanBoost{% endblock title_h1 %}</h1>
     <div>
         {% block content %}{% endblock content %}
     </div>
+    
+    {% block logout %}
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <a href="#" onclick="parentNode.submit();">log out</a>
+        </form>
+    {% endblock logout %}
     <footer>
         PlanBoost © 2026
     </footer>
