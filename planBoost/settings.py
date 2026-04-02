@@ -137,3 +137,6 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = 'media/'
+
+TIME_ZONE = 'Europe/Moscow'
+USE_TZ = True

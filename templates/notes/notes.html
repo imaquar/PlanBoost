@@ -1,4 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Notes{% endblock title %}
 {% block title_h1 %}Notes{% endblock title_h1 %}
-{% block content %}{% endblock content %}
+{% block content %}
+    {% if note %}
+        {% for i in note %}
+            <h2><a href="note/{{ i.id }}/">{{ i.label }}</a></h2>
+        {% endfor %}
+    {% endif %}
+    <form method="get" action="{% url 'notes:create' %}" style="display:inline;">
+        <button type="submit">Create Note</button>
+    </form>
+{% endblock content %}
