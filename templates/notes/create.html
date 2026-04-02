@@ -5,9 +5,18 @@
     <form method="POST" style="display:inline;">
         {% csrf_token %}
         {{ form }}<br>
-        <button type="submit">Create</button>
+        <button id="create-btn" type="submit">Create</button>
     </form>
     <form method="get" action="{% url 'notes:notes' %}" style="display:inline;">
         <button type="submit">Cancel</button>
     </form>
+    <script>
+        const titleInput = document.getElementById('id_label');
+        const createBtn = document.getElementById('create-btn');
+        function toggleCreateButton() {
+            createBtn.disabled = !titleInput.value.trim();
+        }
+        titleInput.addEventListener('input', toggleCreateButton);
+        toggleCreateButton();
+    </script>
 {% endblock content %}
