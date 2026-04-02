@@ -18,3 +18,19 @@ def note(request, id):
     except Note.DoesNotExist:
         return HttpResponseNotFound('<h2>Note not found</h2>')
     return render(request, 'notes/note.html', {'note' : note})
+
+@login_required
+def create(request):
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+        if form.is_valid():
+            note = Note()
+            note.label = form.cleaned_data['label']
+            note.text = form.cleaned_data['text']
+            note.user = request.user
+            note.save()
+            return HttpResponseRedirect('/notes/')
+    else:
+        form = NoteForm()
+
+    return render(request, 'notes/create.html', {'form': form})
