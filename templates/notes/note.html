@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Notes{% endblock title %}
+{% block title_h1 %}{% endblock title_h1 %}
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+        <h2>{{ note.label }}</h2>
+        <h2>{{ note.created_at|date:"d.m.y H:i" }}</h2>
+        <p>{{ note.text }}</p>
+    </form>
+{% endblock content %}
