@@ -53,7 +53,7 @@ def edit(request, id):
         return HttpResponseRedirect(f'/notes/note/{id}/')
     else:
         form = NoteForm(model_to_dict(note))
-        return render(request, 'notes/edit.html', {'form': form})
+        return render(request, 'notes/edit.html', {'form': form, 'note': note})
 
 @login_required
 @require_POST

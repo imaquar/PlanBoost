@@ -7,9 +7,11 @@
         <h2>{{ note.label }}</h2>
         <h2>{{ note.created_at|date:"d.m.y H:i" }}</h2>
         <p>{{ note.text }}</p>
-        <a href="{% url 'notes:edit' note.id %}">Edit</a>
     </form>
-    <form method="POST" action="{% url 'notes:delete' note.id %}">
+    <form method="get" action="{% url 'notes:edit' note.id %}" style="display:inline;">
+        <button type="submit">Edit</button>
+    </form>
+    <form method="POST" action="{% url 'notes:delete' note.id %}" style="display:inline;">
         {% csrf_token %}
         <button type="submit">Delete</button>
     </form>

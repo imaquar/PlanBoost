@@ -7,5 +7,7 @@
             <h2><a href="note/{{ i.id }}/">{{ i.label }}</a></h2>
         {% endfor %}
     {% endif %}
-    <a href="{% url 'notes:create' %}">Create Note</a>
+    <form method="get" action="{% url 'notes:create' %}" style="display:inline;">
+        <button type="submit">Create Note</button>
+    </form>
 {% endblock content %}
