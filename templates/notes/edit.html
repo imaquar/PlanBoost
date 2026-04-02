@@ -4,9 +4,7 @@
 {% block content %}
     <form method="POST">
         {% csrf_token %}
-        <h2>{{ note.label }}</h2>
-        <h2>{{ note.created_at|date:"d.m.y H:i" }}</h2>
-        <p>{{ note.text }}</p>
-        <a href="{% url 'notes:edit' note.id %}">Edit</a>
+        {{ form }}<br>
+        <button type="submit">Update</button>
     </form>
 {% endblock content %}

@@ -34,3 +34,22 @@ def create(request):
         form = NoteForm()
 
     return render(request, 'notes/create.html', {'form': form})
+
+
+@login_required
+def edit(request, id):
+    try:
+        note = Note.objects.get(id=id, user=request.user)
+    except Note.DoesNotExist:
+        return HttpResponseNotFound('<h2>Note not found</h2>')
+
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+        if form.is_valid():
+            note.label = form.cleaned_data['label']
+            note.text = form.cleaned_data['text']
+            note.save()
+        return HttpResponseRedirect(f'/notes/note/{id}/')
+    else:
+        form = NoteForm(model_to_dict(note))
+        return render(request, 'notes/edit.html', {'form': form})
