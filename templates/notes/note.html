@@ -9,4 +9,8 @@
         <p>{{ note.text }}</p>
         <a href="{% url 'notes:edit' note.id %}">Edit</a>
     </form>
+    <form method="POST" action="{% url 'notes:delete' note.id %}">
+        {% csrf_token %}
+        <button type="submit">Delete</button>
+    </form>
 {% endblock content %}

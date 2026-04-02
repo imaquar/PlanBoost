@@ -4,6 +4,7 @@ from .forms import NoteForm
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.forms.models import model_to_dict
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 @login_required
 def index(request):
@@ -53,3 +54,13 @@ def edit(request, id):
     else:
         form = NoteForm(model_to_dict(note))
         return render(request, 'notes/edit.html', {'form': form})
+
+@login_required
+@require_POST
+def delete(request, id):
+    try:
+        note = Note.objects.get(id=id, user=request.user)
+    except Note.DoesNotExist:
+        return HttpResponseNotFound('<h2>Note not found</h2>')
+    note.delete()
+    return HttpResponseRedirect('/notes/')
