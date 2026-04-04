@@ -37,3 +37,23 @@ def create(request):
         form = TaskForm()
 
     return render(request, 'tasks/create.html', {'form': form})
+
+@login_required
+def edit(request, id):
+    try:
+        task = Task.objects.get(id=id, user=request.user)
+    except Task.DoesNotExist:
+        return HttpResponseNotFound('<h2>Task not found</h2>')
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task.label = form.cleaned_data['label']
+            task.description = form.cleaned_data['description']
+            task.deadline = form.cleaned_data['deadline']
+            task.priority = form.cleaned_data['priority']
+            task.save()
+        return HttpResponseRedirect(f'/tasks/task/{id}/')
+    else:
+        form = TaskForm(model_to_dict(task))
+        return render(request, 'tasks/edit.html', {'form': form, 'task': task})

@@ -5,8 +5,11 @@
     <form method="POST">
         {% csrf_token %}
         <h2>{{ task.label }}</h2>
-        <p>{{ task.description" }}</p>
+        <p>{{ task.description }}</p>
         <p>{{ task.deadline }}</p>
         <p>{{ task.get_priority_display }}</p>
+    </form>
+    <form method="get" action="{% url 'tasks:edit' task.id %}" style="display:inline;">
+        <button type="submit">Edit</button>
     </form>
 {% endblock content %}
