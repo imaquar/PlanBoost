@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Tasks{% endblock title %}
+{% block title_h1 %}{% endblock title_h1 %}
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+        <h2>{{ task.label }}</h2>
+        <p>{{ task.description" }}</p>
+        <p>{{ task.deadline }}</p>
+        <p>{{ task.get_priority_display }}</p>
+    </form>
+{% endblock content %}
