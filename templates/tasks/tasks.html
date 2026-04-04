@@ -2,9 +2,20 @@
 {% block title %}Tasks{% endblock title %}
 {% block title_h1 %}Tasks{% endblock title_h1 %}
 {% block content %}
+    <a href="{% url 'tasks:tasks' %}">Active</a>
+    <a href="{% url 'tasks:tasks' %}?show=completed">Completed</a>
+    <br>
+    <br>
     {% if task %}
         {% for i in task %}
-            <h2><a href="task/{{ i.id }}/">{{ i.label }}</a></h2>
+            <div style="display:flex; gap:8px;">
+                <form method="post" action="{% url 'tasks:toggle_status' i.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <input type="checkbox" name="status" {% if i.status %}checked{% endif %} onchange="this.form.submit()">
+                </form>
+                <a href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
+            </div>
         {% endfor %}
     {% endif %}
     <form method="get" action="{% url 'tasks:create' %}" style="display:inline;">
