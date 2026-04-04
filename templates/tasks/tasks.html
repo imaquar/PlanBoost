@@ -7,4 +7,7 @@
             <h2><a href="task/{{ i.id }}/">{{ i.label }}</a></h2>
         {% endfor %}
     {% endif %}
+    <form method="get" action="{% url 'tasks:create' %}" style="display:inline;">
+        <button type="submit">Create Task</button>
+    </form>
 {% endblock content %}

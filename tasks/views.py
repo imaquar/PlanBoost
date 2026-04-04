@@ -18,3 +18,22 @@ def task(request, id):
     except Task.DoesNotExist:
         return HttpResponseNotFound('<h2>Task not found</h2>')
     return render(request, 'tasks/task.html', {'task' : task})
+
+@login_required
+def create(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = Task()
+            task.label = form.cleaned_data['label']
+            task.description = form.cleaned_data['description']
+            task.deadline = form.cleaned_data['deadline']
+            task.priority = form.cleaned_data['priority']
+            task.status = False
+            task.user = request.user
+            task.save()
+            return HttpResponseRedirect('/tasks/')
+    else:
+        form = TaskForm()
+
+    return render(request, 'tasks/create.html', {'form': form})
