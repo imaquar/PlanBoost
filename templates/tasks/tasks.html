@@ -1,4 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Tasks{% endblock title %}
 {% block title_h1 %}Tasks{% endblock title_h1 %}
-{% block content %}{% endblock content %}
+{% block content %}
+    {% if task %}
+        {% for i in task %}
+            <h2><a href="task/{{ i.id }}/">{{ i.label }}</a></h2>
+        {% endfor %}
+    {% endif %}
+{% endblock content %}
