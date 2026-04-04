@@ -12,4 +12,8 @@
     <form method="get" action="{% url 'tasks:edit' task.id %}" style="display:inline;">
         <button type="submit">Edit</button>
     </form>
+    <form method="POST" action="{% url 'tasks:delete' task.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Delete</button>
+    </form>
 {% endblock content %}

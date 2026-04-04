@@ -4,6 +4,7 @@ from .forms import TaskForm
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.forms.models import model_to_dict
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 @login_required
 def index(request):
@@ -57,3 +58,13 @@ def edit(request, id):
     else:
         form = TaskForm(model_to_dict(task))
         return render(request, 'tasks/edit.html', {'form': form, 'task': task})
+    
+@login_required
+@require_POST
+def delete(request, id):
+    try:
+        task = Task.objects.get(id=id, user=request.user)
+    except Task.DoesNotExist:
+        return HttpResponseNotFound('<h2>Task not found</h2>')
+    task.delete()
+    return HttpResponseRedirect('/tasks/')
