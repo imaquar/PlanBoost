@@ -1,4 +1,28 @@
 {% extends 'base.html' %}
 {% block title %}Tasks{% endblock title %}
 {% block title_h1 %}Tasks{% endblock title_h1 %}
-{% block content %}{% endblock content %}
+{% block content %}
+    <a href="{% url 'tasks:tasks' %}">Active</a>
+    <a href="{% url 'tasks:tasks' %}?show=completed">Completed</a>
+    <br>
+    <br>
+    {% if task %}
+        {% for i in task %}
+            <div style="display:flex; gap:8px;">
+                <form method="post" action="{% url 'tasks:toggle_status' i.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <input type="checkbox" name="status" {% if i.status %}checked{% endif %} onchange="this.form.submit()">
+                </form>
+                <a href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <a href="?show={% if show_completed %}completed{% endif %}&sort=deadline">Sort by deadline</a>
+    <a href="?show={% if show_completed %}completed{% endif %}&sort=priority">Sort by priority</a>
+    <br>
+    <br>
+    <form method="get" action="{% url 'tasks:create' %}" style="display:inline;">
+        <button type="submit">Create Task</button>
+    </form>
+{% endblock content %}

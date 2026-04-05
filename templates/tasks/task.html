@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Tasks{% endblock title %}
+{% block title_h1 %}{% endblock title_h1 %}
+{% block content %}
+    <form method="POST" action="{% url 'tasks:toggle_status' task.id %}" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'tasks:tasks' %}">
+        <label>
+            <input type="checkbox" name="status" {% if task.status %}checked{% endif %} onchange="this.form.submit()">
+            Completed
+        </label>
+    </form>
+    <form method="POST">
+        {% csrf_token %}
+        <h2>{{ task.label }}</h2>
+        <p>{{ task.description }}</p>
+        <p>{{ task.deadline }}</p>
+        <p>{{ task.get_priority_display }}</p>
+    </form>
+    <form method="get" action="{% url 'tasks:edit' task.id %}" style="display:inline;">
+        <button type="submit">Edit</button>
+    </form>
+    <form method="POST" action="{% url 'tasks:delete' task.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Delete</button>
+    </form>
+{% endblock content %}
