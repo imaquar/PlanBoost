@@ -5,7 +5,7 @@
     <form method="POST" style="display:inline;">
         {% csrf_token %}
         {{ form }}<br>
-        <button id="create-btn" type="submit">Create</button>
+        <button id="create-btn" type="submit" disabled>Create</button>
     </form>
     <form method="get" action="{% url 'notes:notes' %}" style="display:inline;">
         <button type="submit">Cancel</button>
