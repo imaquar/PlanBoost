@@ -18,6 +18,10 @@
             </div>
         {% endfor %}
     {% endif %}
+    <a href="?show={% if show_completed %}completed{% endif %}&sort=deadline">Sort by deadline</a>
+    <a href="?show={% if show_completed %}completed{% endif %}&sort=priority">Sort by priority</a>
+    <br>
+    <br>
     <form method="get" action="{% url 'tasks:create' %}" style="display:inline;">
         <button type="submit">Create Task</button>
     </form>

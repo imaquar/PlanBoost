@@ -11,11 +11,13 @@ from django.utils import timezone
 @login_required
 def index(request):
     show_completed = request.GET.get('show') == 'completed'
-    if show_completed:
-        task = Task.objects.filter(user=request.user, status=True)
+    sort = request.GET.get('sort', 'deadline')
+    qs = Task.objects.filter(user=request.user, status=show_completed)
+    if sort == 'priority':
+        qs = qs.order_by('-priority', 'deadline')
     else:
-        task = Task.objects.filter(user=request.user, status=False)
-    return render(request, 'tasks/tasks.html', {'task': task, 'show_completed': show_completed})
+        qs = qs.order_by('deadline')
+    return render(request, 'tasks/tasks.html', {'task': qs, 'show_completed': show_completed, 'sort': sort})
 
 @login_required
 def task(request, id):
