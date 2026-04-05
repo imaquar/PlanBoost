@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from tasks.models import Task
 from .forms import TaskForm
-from django.http import HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponseRedirect, HttpResponseNotFound, JsonResponse
 from django.forms.models import model_to_dict
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from .services import get_task_completion_stats
 
 @login_required
 def index(request):
@@ -85,3 +86,9 @@ def toggle_status(request, id):
     task.completed_at = timezone.now() if is_done else None
     task.save(update_fields=['status', 'completed_at'])
     return redirect(request.POST.get('next') or 'tasks:tasks')
+
+@login_required
+@require_GET
+def stats(request):
+    data = get_task_completion_stats(request.user)
+    return JsonResponse(data)
