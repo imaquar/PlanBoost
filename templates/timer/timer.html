@@ -1,4 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Timer{% endblock title %}
 {% block title_h1 %}Timer{% endblock title_h1 %}
-{% block content %}{% endblock content %}
+{% block content %}
+<section id="timer-shell" class="timer-shell">
+    <h2 id="timer-display" class="timer-display">30:00</h2>
+    <p id="timer-mode" class="timer-mode">in work</p>
+
+    <div class="timer-controls">
+        <button id="start-button" type="button">Start</button>
+        <button id="pause-button" type="button">Pause</button>
+        <button id="reset-button" type="button">Reset</button>
+    </div>
+</section>
+{% endblock content %}
