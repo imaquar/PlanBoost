@@ -11,7 +11,17 @@
         <button id="start-button" type="button">Start</button>
         <button id="pause-button" type="button">Pause</button>
         <button id="reset-button" type="button">Reset</button>
+        <button id="set-button" type="button">Set</button>
     </div>
+
+    <form id="timer-set-form" hidden>
+        <label for="work-input">Work (m:s)</label>
+        <input id="work-input" name="work" type="text" placeholder="30:00" />
+        <label for="break-input">Break (m:s)</label>
+        <input id="break-input" name="break" type="text" placeholder="05:00" />
+        <button id="apply-set-button" type="submit">Apply</button>
+        <button id="cancel-set-button" type="button">Cancel</button>
+    </form>
 </section>
 <script src="{% static 'timer/js/timer.js' %}"></script>
 {% endblock content %}
