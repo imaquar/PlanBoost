@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'tasks.apps.TasksConfig',
     'timer.apps.TimerConfig',
     'users.apps.UsersConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [

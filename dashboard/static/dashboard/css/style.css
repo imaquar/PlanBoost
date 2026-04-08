@@ -1,0 +1,25 @@
+.stats-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    min-height: 140px;
+    padding: 12px 0;
+}
+
+.stats-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.stats-bar {
+    width: 28px;
+    height: calc((var(--count) * 14px) + 6px);
+    border-radius: 6px 6px 0 0;
+    background: #000000;
+}
+
+.stats-bar-value {
+    font-size: 12px;
+}
