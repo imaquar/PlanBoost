@@ -1,16 +1,22 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}PlanBoost{% endblock title %}
 {% block title_h1 %}Dashboard{% endblock title_h1 %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
+
 <section>
     <h2>Productivity Stats</h2>
     <p>Done today: {{ today_done_count }}</p>
     <p>Last 7 days:</p>
-    <ul>
+    <div class="stats-chart">
         {% for count in last_7_days_done_counts %}
-            <li>{{ count }}</li>
+            <div class="stats-bar-wrap">
+                <div class="stats-bar" style="--count: {{ count }};"></div>
+                <div class="stats-bar-value">{{ count }}</div>
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 </section>
 
 <section>
