@@ -14,7 +14,7 @@
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                     <input type="checkbox" name="status" {% if i.status %}checked{% endif %} onchange="this.form.submit()">
                 </form>
-                <a href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
+                <a href="{% url 'tasks:task' i.id %}?next={{ request.get_full_path|urlencode }}">{{ i.label }}</a>
             </div>
         {% endfor %}
     {% endif %}

@@ -22,6 +22,7 @@
     </form>
     <form method="POST" action="{% url 'tasks:delete' task.id %}" style="display:inline;">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
         <button type="submit">Delete</button>
     </form>
 {% endblock content %}

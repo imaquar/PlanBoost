@@ -26,7 +26,8 @@ def task(request, id):
         task = Task.objects.get(id=id, user=request.user)
     except Task.DoesNotExist:
         return HttpResponseNotFound('<h2>Task not found</h2>')
-    return render(request, 'tasks/task.html', {'task' : task})
+    next_url = request.GET.get('next', '')
+    return render(request, 'tasks/task.html', {'task' : task, 'next': next_url})
 
 @login_required
 def create(request):
@@ -75,7 +76,7 @@ def delete(request, id):
     except Task.DoesNotExist:
         return HttpResponseNotFound('<h2>Task not found</h2>')
     task.delete()
-    return HttpResponseRedirect('/tasks/')
+    return redirect(request.POST.get('next') or 'tasks:tasks')
 
 @login_required
 @require_POST
