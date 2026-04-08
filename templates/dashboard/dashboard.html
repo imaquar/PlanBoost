@@ -24,7 +24,12 @@
     {% if upcoming_tasks %}
         <ul>
             {% for i in upcoming_tasks %}
-                <li>
+                <li style="display:flex; gap:8px;">
+                    <form method="post" action="{% url 'tasks:toggle_status' i.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <input type="checkbox" name="status" onchange="this.form.submit()">
+                    </form>
                     <a href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
                     ({{ i.deadline|date:"d.m.y H:i" }})
                 </li>
