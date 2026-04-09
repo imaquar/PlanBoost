@@ -407,7 +407,17 @@ input[type="checkbox"]:checked::before {
 }
 
 .site-footer {
-    padding: 1rem 0;
+    padding: 1rem 0 1.25rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(31, 35, 40, 0.12);
+}
+
+.site-footer .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted);
+    font-size: 0.95rem;
 }
 
 @media (max-width: 780px) {
