@@ -4,29 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/a533a36acf.js" crossorigin="anonymous"></script>
     <title>{% block title %}PlanBoost{% endblock title %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body>
+<body class="page">
     {% block header %}
-        <header>
-            <nav>
-                <a href="/">Dashboard</a>
-                <a href="/tasks/">Tasks</a>
-                <a href="/notes/">Notes</a>
-                <a href="/timer/">Timer</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'users:profile' %}">Profile</a>
-                {% endif %}
-            </nav>
+        <header class="site-header">
+            <div class="container">
+                <div class="header-shell">
+                    <div class="header-side header-left">
+                        <button class="header-icon-button theme-button" type="button" aria-label="Theme toggle">
+                            <i class="fa-solid fa-moon"></i>
+                        </button>
+                    </div>
+
+                    <div class="header-center">
+                        <a class="header-icon-button header-logo-button" href="/" aria-label="Dashboard">
+                            <img class="header-logo-dark" src="{% static 'images/planBoostLogoDark.png' %}" alt="PlanBoost logo">
+                            <img class="header-logo-white" src="{% static 'images/planBoostLogoWhite.png' %}" alt="PlanBoost logo active">
+                        </a>
+
+                        <div class="header-menu-container">
+                            <span class="header-menu-trigger">PlanBoost</span>
+                            <ul class="header-dropdown">
+                                <li><a class="header-dropdown-link" href="/tasks/">Tasks</a></li>
+                                <li><a class="header-dropdown-link" href="/notes/">Notes</a></li>
+                                <li><a class="header-dropdown-link" href="/timer/">Timer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="header-side header-right">
+                        {% if user.is_authenticated %}
+                            <a class="header-icon-button header-profile-button" href="{% url 'users:profile' %}" aria-label="Profile">
+                               <i class="fa-solid fa-user"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </header>
     {% endblock header %}
-    <h1>{% block title_h1 %}PlanBoost{% endblock title_h1 %}</h1>
-    <div>
-        {% block content %}{% endblock content %}
-    </div>
+    <main class="page-main">
+        <div class="container">
+            <h1 class="page-title">{% block title_h1 %}PlanBoost{% endblock title_h1 %}</h1>
+            <div class="page-content">
+                {% block content %}{% endblock content %}
+            </div>
+        </div>
+    </main>
 
-    <footer>
-        PlanBoost © 2026
+    <footer class="site-footer">
+        <div class="container">
+            PlanBoost © 2026
+        </div>
     </footer>
 </body>
 </html>
