@@ -100,3 +100,56 @@
 .auth-errors li {
     margin: 0;
 }
+
+@media (max-width: 640px) {
+    .auth-page .page-main {
+        padding-top: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .auth-login-layout {
+        min-height: auto;
+        padding: 0.5rem 0;
+    }
+
+    .auth-card {
+        width: 100%;
+        border-radius: 1.75rem;
+        padding: 1.2rem 0.9rem 1rem;
+    }
+
+    .auth-brand {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+    }
+
+    .auth-form p {
+        width: 100%;
+        margin-bottom: 0.7rem;
+    }
+
+    .auth-form button {
+        min-width: 8.5rem;
+        margin-top: 1.25rem;
+    }
+
+    .auth-remember-row {
+        margin-bottom: 0.9rem;
+        font-size: 0.9rem;
+    }
+
+    .auth-meta {
+        margin-top: 0.95rem;
+        font-size: 0.9rem;
+    }
+
+    .auth-meta-link a {
+        font-size: 0.9rem;
+    }
+
+    .auth-errors {
+        width: 100%;
+        margin-bottom: 0.8rem;
+    }
+}
