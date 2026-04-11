@@ -1,26 +1,36 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Login{% endblock title %}
-{% block title_h1 %}PlanBoost{% endblock title_h1 %}
+{% block body_class %}auth-page auth-login-page{% endblock body_class %}
+{% block css %}<link rel="stylesheet" href="{% static 'users/css/style.css' %}?v=2">{% endblock css %}
+{% block title_h1 %}{% endblock title_h1 %}
 {% block header %}{% endblock header %}
 {% block content %}
-    {% if form.errors %}
-        <div style="display: table; text-align: left;">
-            {% for key, value in form.errors.items %}
-                <strong>{{ value }}</strong>
-            {% endfor %}
-        </div>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <p>{{ form.username }}</p>
-        <p>{{ form.password }}</p>
-        <p>
-            <label for="{{ form.remember_me.id_for_label }}">remember me</label>
-            {{ form.remember_me }}
-        </p>
-        <button type="submit">log in</button>
-    </form>
+    <div class="auth-login-layout">
+        <section class="auth-card" aria-labelledby="login-title">
+            <h2 id="login-title" class="auth-brand">PlanBoost</h2>
 
-    <p>don't have an account?</p>
-    <p><a href="{% url 'users:register' %}">register</a></p>
+            {% if form.errors %}
+                <div class="auth-errors" role="alert">
+                    {% for key, value in form.errors.items %}
+                        <p>{{ value }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                <p>{{ form.username }}</p>
+                <p>{{ form.password }}</p>
+                <p class="auth-remember-row">
+                    <label for="{{ form.remember_me.id_for_label }}">remember me</label>
+                    {{ form.remember_me }}
+                </p>
+                <button type="submit">log in</button>
+            </form>
+
+            <p class="auth-meta">don't have an account?</p>
+            <p class="auth-meta-link"><a href="{% url 'users:register' %}">register</a></p>
+        </section>
+    </div>
 {% endblock content %}
