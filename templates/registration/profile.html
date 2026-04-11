@@ -1,45 +1,40 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile{% endblock title %}
+{% block css %}<link rel="stylesheet" href="{% static 'users/css/style.css' %}?v=2">{% endblock css %}
 {% block title_h1 %}{% endblock title_h1 %}
 {% block content %}
-    <div>
-        <img src="{{ user.profile.avatar.url }} " style="cursor: pointer;"/>
-    </div>
-    {% if user_form.errors %}
-        <div role="alert">
-            <div>
+    <div class="profile-layout">
+        <div class="profile-avatar-wrap">
+            <img class="profile-avatar" src="{{ user.profile.avatar.url }}" alt="Profile avatar">
+        </div>
+        {% if user_form.errors or profile_form.errors %}
+            <div class="profile-errors" role="alert">
                 {% for key, value in user_form.errors.items %}
-                    <strong>{{ value }}</strong>
+                    <p>{{ value }}</p>
+                {% endfor %}
+                {% for key, value in profile_form.errors.items %}
+                    <p>{{ value }}</p>
                 {% endfor %}
             </div>
-            <button type="button" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% endif %}
-    <div class="form-content">
-        <form method="post" enctype="multipart/form-data">
+        {% endif %}
+        <form id="profile-form" method="post" enctype="multipart/form-data" class="profile-form">
             {% csrf_token %}
-            <div>
-                <div>
-                    <div>
-                        <label>Username:</label>
-                        {{ user_form.username }}
-                    </div>
-                    <hr>
-                    <div><a href="{% url 'users:password_change' %}">Change Password</a>
-                        <hr>
-                        <label>Change Avatar:</label>
-                        {{ profile_form.avatar }}
-                    </div>
-                    <hr>
-                </div>
+            <div class="profile-row">
+                {{ user_form.username }}
             </div>
-            <br><br>
-            <button type="submit">Save Changes</button>
+            <a class="profile-password-link" href="{% url 'users:password_change' %}">change password</a>
+            <div class="profile-row profile-avatar-input-row">
+                {{ profile_form.avatar }}
+                <label class="profile-avatar-upload-label" for="{{ profile_form.avatar.id_for_label }}">change avatar</label>
+            </div>
         </form>
+        <div class="profile-actions">
+            <button class="profile-save-button" type="submit" form="profile-form">save</button>
+            <form action="{% url 'logout' %}" method="post" class="profile-logout-form">
+                {% csrf_token %}
+                <button class="profile-logout-button" type="submit">log out</button>
+            </form>
+        </div>
     </div>
-    <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <a href="#" onclick="parentNode.submit();">log out</a>
-    </form>
 {% endblock content %}
