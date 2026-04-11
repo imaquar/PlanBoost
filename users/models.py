@@ -16,8 +16,8 @@ class Profile(models.Model):
 
         img = Image.open(self.avatar.path)
 
-        if img.height > 100 or img.width > 100:
-            new_img = (100, 100)
+        if img.height > 1000 or img.width > 1000:
+            new_img = (1000, 1000)
             img.thumbnail(new_img)
         if img.mode in ("RGBA", "P"):
             img = img.convert("RGB")
