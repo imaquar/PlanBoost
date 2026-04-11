@@ -2,10 +2,10 @@
 {% load static %}
 {% block title %}Login{% endblock title %}
 {% block body_class %}auth-page auth-login-page{% endblock body_class %}
+{% block css %}<link rel="stylesheet" href="{% static 'users/css/style.css' %}?v=2">{% endblock css %}
 {% block title_h1 %}{% endblock title_h1 %}
 {% block header %}{% endblock header %}
 {% block content %}
-    <link rel="stylesheet" href="{% static 'users/css/style.css' %}">
     <div class="auth-login-layout">
         <section class="auth-card" aria-labelledby="login-title">
             <h2 id="login-title" class="auth-brand">PlanBoost</h2>

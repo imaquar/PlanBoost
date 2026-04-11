@@ -7,6 +7,7 @@
     <script src="https://kit.fontawesome.com/a533a36acf.js" crossorigin="anonymous"></script>
     <title>{% block title %}PlanBoost{% endblock title %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block css %}{% endblock css %}
 </head>
 <body class="page {% block body_class %}{% endblock body_class %}">
     {% block header %}
