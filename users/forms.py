@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import PasswordChangeForm
 
 from .models import Profile
 
@@ -35,3 +36,11 @@ class LoginForm(AuthenticationForm):
     password = forms.CharField(max_length=50, required=True,
                                widget=forms.PasswordInput(attrs={'placeholder': 'password'}))
     remember_me = forms.BooleanField(required=False)
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    old_password = forms.CharField(max_length=128, required=True, 
+                                   widget=forms.PasswordInput(attrs={'placeholder': 'old password', 'autocomplete': 'current-password'}))
+    new_password1 = forms.CharField(max_length=128, required=True, 
+                                    widget=forms.PasswordInput(attrs={'placeholder': 'new password', 'autocomplete': 'new-password'}))
+    new_password2 = forms.CharField(max_length=128, required=True,
+                                    widget=forms.PasswordInput(attrs={'placeholder': 'confirm new password', 'autocomplete': 'new-password'}))

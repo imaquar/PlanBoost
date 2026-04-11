@@ -1,4 +1,4 @@
-from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
+from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm, CustomPasswordChangeForm
 from django.urls import reverse_lazy
 from django.views import generic
 from django.shortcuts import render, redirect
@@ -59,5 +59,6 @@ class CustomLoginView(LoginView):
         return super(CustomLoginView, self).form_valid(form)
     
 class ChangePasswordView(PasswordChangeView):
+    form_class = CustomPasswordChangeForm
     template_name = 'registration/change_password.html'
     success_url = reverse_lazy('users:profile')
