@@ -1,23 +1,33 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Register{% endblock title %}
-{% block title_h1 %}PlanBoost{% endblock title_h1 %}
+{% block body_class %}auth-page auth-register-page{% endblock body_class %}
+{% block title_h1 %}{% endblock title_h1 %}
 {% block header %}{% endblock header %}
 {% block content %}
-    {% if form.errors %}
-        <div style="display: table; text-align: left;">
-            {% for key, value in form.errors.items %}
-                <strong>{{ value }}</strong>
-            {% endfor %}
-        </div>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <p>{{ form.username }}</p>
-        <p>{{ form.password1 }}</p>
-        <p>{{ form.password2 }}</p>
-        <button type="submit">register</button>
-    </form>
+    <link rel="stylesheet" href="{% static 'users/css/style.css' %}">
+    <div class="auth-login-layout">
+        <section class="auth-card" aria-labelledby="register-title">
+            <h2 id="register-title" class="auth-brand">PlanBoost</h2>
 
-    <p>have an account?</p>
-    <p><a href="{% url 'login' %}">log in</a></p>
+            {% if form.errors %}
+                <div class="auth-errors" role="alert">
+                    {% for key, value in form.errors.items %}
+                        <p>{{ value }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                <p>{{ form.username }}</p>
+                <p>{{ form.password1 }}</p>
+                <p>{{ form.password2 }}</p>
+                <button type="submit">register</button>
+            </form>
+
+            <p class="auth-meta">have an account?</p>
+            <p class="auth-meta-link"><a href="{% url 'login' %}">log in</a></p>
+        </section>
+    </div>
 {% endblock content %}
