@@ -1,3 +1,54 @@
+.dashboard-page .page-title {
+    text-align: center;
+}
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+
+.dashboard-section {
+    grid-column: span 6;
+    padding: 1rem;
+}
+
+.dashboard-stats-section {
+    grid-column: 1 / -1;
+}
+
+.dashboard-tasks-section,
+.dashboard-notes-section {
+    grid-column: 1 / -1;
+}
+
+.dashboard-section h2 {
+    margin-bottom: 0.75rem;
+}
+
+.dashboard-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.65rem;
+}
+
+.dashboard-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dashboard-task-item {
+    gap: 0.5rem;
+}
+
+.dashboard-empty {
+    margin: 0;
+}
+
 .stats-chart {
     display: flex;
     align-items: flex-end;
