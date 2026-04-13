@@ -25,11 +25,17 @@
     grid-column: 1 / -1;
 }
 
+.dashboard-tasks-section {
+    width: min(52rem, 100%);
+    justify-self: center;
+}
+
 .dashboard-section h2 {
     margin-bottom: 0.75rem;
 }
 
-.dashboard-stats-section h2 {
+.dashboard-stats-section h2,
+.dashboard-tasks-section h2 {
     text-align: center;
 }
 
@@ -79,12 +85,53 @@
     gap: 0.5rem;
 }
 
-.dashboard-task-item {
-    gap: 0.5rem;
+.dashboard-tasks-list {
+    gap: 0.8rem;
+    width: 100%;
+}
+
+.dashboard-task-card {
+    width: 100%;
+    border: 0.0625rem solid var(--glass-border);
+    border-radius: 28px;
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(3px);
+    padding: 0.75rem 1rem;
+}
+
+.dashboard-task-toggle {
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.dashboard-task-link {
+    color: var(--header-text);
+    font-weight: 700;
+}
+
+.dashboard-task-link:hover {
+    color: var(--header-text);
+    text-decoration: none;
+}
+
+.dashboard-task-deadline {
+    margin-left: auto;
+    color: var(--color-muted);
+    font-size: 0.92rem;
+    white-space: nowrap;
 }
 
 .dashboard-empty {
     margin: 0;
+}
+
+.dashboard-tasks-section .dashboard-empty {
+    text-align: center;
 }
 
 .stats-chart {

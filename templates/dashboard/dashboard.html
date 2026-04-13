@@ -3,7 +3,7 @@
 {% block title %}PlanBoost{% endblock title %}
 {% block body_class %}dashboard-page{% endblock body_class %}
 {% block title_h1 %}Dashboard{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=2">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=3">{% endblock css %}
 {% block content %}
 <div class="dashboard-layout">
     <section class="dashboard-section dashboard-stats-section">
@@ -31,16 +31,16 @@
     <section class="dashboard-section dashboard-tasks-section">
         <h2>Upcoming Tasks</h2>
         {% if upcoming_tasks %}
-            <ul class="dashboard-list">
+            <ul class="dashboard-list dashboard-tasks-list">
                 {% for i in upcoming_tasks %}
-                    <li class="dashboard-task-item">
-                        <form method="post" action="{% url 'tasks:toggle_status' i.id %}" style="width:auto;display:inline-flex;align-items:center;margin:0;">
+                    <li class="dashboard-task-item dashboard-task-card">
+                        <form class="dashboard-task-toggle" method="post" action="{% url 'tasks:toggle_status' i.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.get_full_path }}">
                             <input type="checkbox" name="status" onchange="this.form.submit()">
                         </form>
-                        <a href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
-                        <span>({{ i.deadline|date:"d.m.y H:i" }})</span>
+                        <a class="dashboard-task-link" href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
+                        <span class="dashboard-task-deadline">{{ i.deadline|date:"d.m.y H:i" }}</span>
                     </li>
                 {% endfor %}
             </ul>
