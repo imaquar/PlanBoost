@@ -34,7 +34,7 @@
             <ul class="dashboard-list">
                 {% for i in upcoming_tasks %}
                     <li class="dashboard-task-item">
-                        <form method="post" action="{% url 'tasks:toggle_status' i.id %}">
+                        <form method="post" action="{% url 'tasks:toggle_status' i.id %}" style="width:auto;display:inline-flex;align-items:center;margin:0;">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.get_full_path }}">
                             <input type="checkbox" name="status" onchange="this.form.submit()">
