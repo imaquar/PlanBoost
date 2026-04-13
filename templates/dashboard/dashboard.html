@@ -3,7 +3,7 @@
 {% block title %}PlanBoost{% endblock title %}
 {% block body_class %}dashboard-page{% endblock body_class %}
 {% block title_h1 %}Dashboard{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=3">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=4">{% endblock css %}
 {% block content %}
 <div class="dashboard-layout">
     <section class="dashboard-section dashboard-stats-section">
@@ -52,11 +52,11 @@
     <section class="dashboard-section dashboard-notes-section">
         <h2>Recent Notes</h2>
         {% if recent_notes %}
-            <ul class="dashboard-list">
+            <ul class="dashboard-list dashboard-notes-list">
                 {% for i in recent_notes %}
-                    <li>
-                        <a href="{% url 'notes:note' i.id %}">{{ i.label }}</a>
-                        <span>({{ i.created_at|date:"d.m.y H:i" }})</span>
+                    <li class="dashboard-note-card">
+                        <a class="dashboard-note-link" href="{% url 'notes:note' i.id %}">{{ i.label }}</a>
+                        <span class="dashboard-note-created">{{ i.created_at|date:"d.m.y H:i" }}</span>
                     </li>
                 {% endfor %}
             </ul>
