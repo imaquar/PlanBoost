@@ -168,3 +168,71 @@
     line-height: 1;
     font-weight: 600;
 }
+
+@media (max-width: 640px) {
+    .dashboard-layout {
+        gap: 0.55rem;
+    }
+
+    .dashboard-section {
+        padding: 0.65rem;
+    }
+
+    .dashboard-section h2 {
+        margin-bottom: 0.6rem;
+    }
+
+    .dashboard-stats-cards {
+        gap: 0.65rem;
+    }
+
+    .dashboard-stat-card {
+        padding: 0.75rem;
+    }
+
+    .dashboard-stat-card h3 {
+        font-size: 0.94rem;
+    }
+
+    .dashboard-stat-value {
+        font-size: clamp(1.45rem, 7vw, 2rem);
+    }
+
+    .stats-chart {
+        min-height: 140px;
+        gap: 0.25rem;
+        padding: 0.25rem 0 0;
+    }
+
+    .stats-bar-wrap {
+        width: 2.1rem;
+    }
+
+    .stats-bar-value {
+        font-size: 0.7rem;
+    }
+
+    .dashboard-tasks-list,
+    .dashboard-notes-list {
+        gap: 0.65rem;
+    }
+
+    .dashboard-task-card,
+    .dashboard-note-card {
+        padding: 0.65rem 0.8rem;
+        flex-wrap: wrap;
+        row-gap: 0.45rem;
+    }
+
+    .dashboard-task-toggle {
+        margin-right: 0.2rem;
+    }
+
+    .dashboard-task-deadline,
+    .dashboard-note-created {
+        margin-left: 0;
+        width: 100%;
+        text-align: right;
+        font-size: 0.84rem;
+    }
+}
