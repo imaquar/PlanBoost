@@ -1,13 +1,28 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Notes{% endblock title %}
+{% block body_class %}notes-page{% endblock body_class %}
 {% block title_h1 %}Notes{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'notes/css/style.css' %}?v=6">{% endblock css %}
 {% block content %}
-    {% if note %}
-        {% for i in note %}
-            <h2><a href="note/{{ i.id }}/">{{ i.label }}</a></h2>
-        {% endfor %}
-    {% endif %}
-    <form method="get" action="{% url 'notes:create' %}" style="display:inline;">
-        <button type="submit">Create Note</button>
-    </form>
+    <div class="notes-list-layout">
+        {% if note %}
+            <ul class="notes-list">
+                {% for i in note %}
+                    <li class="notes-list-item">
+                        <a class="notes-list-link" href="{% url 'notes:note' i.id %}">{{ i.label }}</a>
+                        <span class="notes-list-created">{{ i.created_at|date:"d.m.y H:i" }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="notes-empty">no notes yet</p>
+        {% endif %}
+
+        <div class="notes-actions">
+            <form class="notes-create-form" method="get" action="{% url 'notes:create' %}">
+                <button type="submit">create note</button>
+            </form>
+        </div>
+    </div>
 {% endblock content %}
