@@ -2,7 +2,9 @@
     text-align: center;
 }
 
-.notes-list-layout {
+.notes-list-layout,
+.notes-detail-layout,
+.notes-form-layout {
     width: min(52rem, 100%);
     margin: 0 auto;
     padding-bottom: 7.2rem;
@@ -59,33 +61,10 @@
     padding: 0.75rem 1rem;
 }
 
-.notes-actions {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 5.2rem;
-    z-index: 120;
-    margin-top: 0;
-    display: flex;
-    justify-content: center;
-}
-
-.notes-create-form {
-    width: auto;
-    margin: 0;
-}
-
-.notes-create-form button {
-    min-width: 9.5rem;
-    margin: 0;
-}
-
-.notes-detail-layout {
-    width: min(52rem, 100%);
-    margin: 0 auto;
+.notes-detail-layout,
+.notes-form-layout {
     display: grid;
     gap: 0.8rem;
-    padding-bottom: 7.2rem;
 }
 
 .notes-detail-meta {
@@ -133,25 +112,77 @@
     margin-top: 0.35rem;
 }
 
-.notes-detail-actions {
+.notes-form-shell {
+    margin: 0;
+    display: grid;
+    gap: 0.8rem;
+}
+
+.notes-form-shell input[type="text"],
+.notes-form-shell textarea {
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border: 0.0625rem solid var(--glass-border);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.45);
+    color: var(--color-text);
+    padding: 0.65rem 0.85rem;
+    font: inherit;
+    line-height: 1.4;
+}
+
+.notes-form-shell input[type="text"] {
+    min-height: 2.8rem;
+}
+
+.notes-form-shell textarea {
+    min-height: 8.5rem;
+    resize: none;
+    overflow: hidden;
+}
+
+.notes-form-shell input[type="text"]:focus,
+.notes-form-shell textarea:focus {
+    outline: none;
+    border-color: var(--header-text);
+}
+
+.notes-form-shell input[type="text"]::placeholder,
+.notes-form-shell textarea::placeholder {
+    color: var(--color-muted);
+}
+
+.notes-actions,
+.notes-detail-actions,
+.notes-form-actions {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
     bottom: 5.2rem;
     z-index: 120;
-    margin-top: 0;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.notes-detail-actions,
+.notes-form-actions {
     gap: 1.2rem;
 }
 
-.notes-detail-action-form {
+.notes-create-form,
+.notes-detail-action-form,
+.notes-form-action-form {
     width: auto;
     margin: 0;
 }
 
-.notes-detail-action-form button {
+.notes-create-form button,
+.notes-detail-action-form button,
+.notes-form-actions > button,
+.notes-form-action-form button {
     min-width: 9.5rem;
     margin: 0;
 }

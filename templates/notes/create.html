@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Notes{% endblock title %}
+{% block body_class %}notes-page notes-form-page{% endblock body_class %}
 {% block title_h1 %}{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'notes/css/style.css' %}?v=5">{% endblock css %}
 {% block content %}
-    <form method="POST" style="display:inline;">
-        {% csrf_token %}
-        {{ form }}<br>
-        <button id="create-btn" type="submit" disabled>Create</button>
-    </form>
-    <form method="get" action="{% url 'notes:notes' %}" style="display:inline;">
-        <button type="submit">Cancel</button>
-    </form>
-    <script>
-        const titleInput = document.getElementById('id_label');
-        const createBtn = document.getElementById('create-btn');
-        function toggleCreateButton() {
-            createBtn.disabled = !titleInput.value.trim();
-        }
-        titleInput.addEventListener('input', toggleCreateButton);
-        toggleCreateButton();
-    </script>
+    <div class="notes-form-layout">
+        <form method="post" id="note-create-form" class="notes-form-shell">
+            {% csrf_token %}
+            {{ form.label }}
+            {{ form.text }}
+        </form>
+        <div class="notes-form-actions">
+            <button id="create-btn" type="submit" form="note-create-form" disabled>create</button>
+            <form method="get" action="{% url 'notes:notes' %}" class="notes-form-action-form">
+                <button type="submit">cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'notes/js/note_form.js' %}?v=1"></script>
 {% endblock content %}

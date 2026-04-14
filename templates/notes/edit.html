@@ -1,13 +1,23 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Notes{% endblock title %}
+{% block body_class %}notes-page notes-form-page{% endblock body_class %}
 {% block title_h1 %}{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'notes/css/style.css' %}?v=5">{% endblock css %}
 {% block content %}
-    <form method="POST" style="display:inline;">
-        {% csrf_token %}
-        {{ form }}<br>
-        <button type="submit">Update</button>
-    </form>
-    <form method="get" action="{% url 'notes:note' note.id %}" style="display:inline;">
-        <button type="submit">Cancel</button>
-    </form>
+    <div class="notes-form-layout">
+        <form method="post" id="note-edit-form" class="notes-form-shell">
+            {% csrf_token %}
+            {{ form.label }}
+            {{ form.text }}
+        </form>
+        <div class="notes-form-actions">
+            <button type="submit" form="note-edit-form">update</button>
+            <form method="get" action="{% url 'notes:note' note.id %}" class="notes-form-action-form">
+                <button type="submit">cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'notes/js/note_form.js' %}?v=1"></script>
 {% endblock content %}
