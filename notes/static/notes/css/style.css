@@ -5,6 +5,7 @@
 .notes-list-layout {
     width: min(52rem, 100%);
     margin: 0 auto;
+    padding-bottom: 7.2rem;
 }
 
 .notes-list {
@@ -59,7 +60,12 @@
 }
 
 .notes-actions {
-    margin-top: 2.4rem;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 5.2rem;
+    z-index: 120;
+    margin-top: 0;
     display: flex;
     justify-content: center;
 }
