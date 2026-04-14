@@ -1,18 +1,24 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Notes{% endblock title %}
+{% block body_class %}notes-page notes-detail-page{% endblock body_class %}
 {% block title_h1 %}{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'notes/css/style.css' %}?v=4">{% endblock css %}
 {% block content %}
-    <form method="POST">
-        {% csrf_token %}
-        <h2>{{ note.label }}</h2>
-        <h2>{{ note.created_at|date:"d.m.y H:i" }}</h2>
-        <p>{{ note.text }}</p>
-    </form>
-    <form method="get" action="{% url 'notes:edit' note.id %}" style="display:inline;">
-        <button type="submit">Edit</button>
-    </form>
-    <form method="POST" action="{% url 'notes:delete' note.id %}" style="display:inline;">
-        {% csrf_token %}
-        <button type="submit">Delete</button>
-    </form>
+    <div class="notes-detail-layout">
+        <div class="notes-detail-meta">
+            <h2 class="notes-detail-card notes-detail-title">{{ note.label }}</h2>
+            <p class="notes-detail-card notes-detail-created">{{ note.created_at|date:"d.m.y H:i" }}</p>
+        </div>
+        <div class="notes-detail-card notes-detail-text">{{ note.text }}</div>
+        <div class="notes-detail-actions">
+            <form class="notes-detail-action-form" method="get" action="{% url 'notes:edit' note.id %}">
+                <button type="submit">edit</button>
+            </form>
+            <form class="notes-detail-action-form" method="post" action="{% url 'notes:delete' note.id %}">
+                {% csrf_token %}
+                <button type="submit">delete</button>
+            </form>
+        </div>
+    </div>
 {% endblock content %}
