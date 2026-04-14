@@ -131,11 +131,15 @@
 
 .dashboard-empty {
     margin: 0;
-}
-
-.dashboard-tasks-section .dashboard-empty,
-.dashboard-notes-section .dashboard-empty {
+    width: 100%;
     text-align: center;
+    border: 0.0625rem solid var(--glass-border);
+    border-radius: 28px;
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(3px);
+    padding: 0.75rem 1rem;
 }
 
 .stats-chart {
