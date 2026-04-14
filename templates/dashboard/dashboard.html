@@ -1,58 +1,68 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}PlanBoost{% endblock title %}
+{% block body_class %}dashboard-page{% endblock body_class %}
 {% block title_h1 %}Dashboard{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=4">{% endblock css %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
+<div class="dashboard-layout">
+    <section class="dashboard-section dashboard-stats-section">
+        <h2>Productivity Stats</h2>
+        <div class="dashboard-stats-cards">
+            <article class="dashboard-stat-card">
+                <h3>Done today</h3>
+                <p class="dashboard-stat-value">{{ today_done_count }}</p>
+            </article>
 
-<section>
-    <h2>Productivity Stats</h2>
-    <p>Done today: {{ today_done_count }}</p>
-    <p>Last 7 days:</p>
-    <div class="stats-chart">
-        {% for count in last_7_days_done_counts %}
-            <div class="stats-bar-wrap">
-                <div class="stats-bar" style="--count: {{ count }};"></div>
-                <div class="stats-bar-value">{{ count }}</div>
-            </div>
-        {% endfor %}
-    </div>
-</section>
+            <article class="dashboard-stat-card dashboard-stat-chart-card">
+                <h3>Last 7 days</h3>
+                <div class="stats-chart">
+                    {% for count in last_7_days_done_counts %}
+                        <div class="stats-bar-wrap">
+                            <div class="stats-bar" style="--count: {{ count }};"></div>
+                            <div class="stats-bar-value">{{ count }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </article>
+        </div>
+    </section>
 
-<section>
-    <h2>Upcoming Tasks</h2>
-    {% if upcoming_tasks %}
-        <ul>
-            {% for i in upcoming_tasks %}
-                <li style="display:flex; gap:8px;">
-                    <form method="post" action="{% url 'tasks:toggle_status' i.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                        <input type="checkbox" name="status" onchange="this.form.submit()">
-                    </form>
-                    <a href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
-                    ({{ i.deadline|date:"d.m.y H:i" }})
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No upcoming tasks</p>
-    {% endif %}
-</section>
+    <section class="dashboard-section dashboard-tasks-section">
+        <h2>Upcoming Tasks</h2>
+        {% if upcoming_tasks %}
+            <ul class="dashboard-list dashboard-tasks-list">
+                {% for i in upcoming_tasks %}
+                    <li class="dashboard-task-item dashboard-task-card">
+                        <form class="dashboard-task-toggle" method="post" action="{% url 'tasks:toggle_status' i.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <input type="checkbox" name="status" onchange="this.form.submit()">
+                        </form>
+                        <a class="dashboard-task-link" href="{% url 'tasks:task' i.id %}">{{ i.label }}</a>
+                        <span class="dashboard-task-deadline">{{ i.deadline|date:"d.m.y H:i" }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="dashboard-empty">No upcoming tasks</p>
+        {% endif %}
+    </section>
 
-<section>
-    <h2>Recent Notes</h2>
-    {% if recent_notes %}
-        <ul>
-            {% for i in recent_notes %}
-                <li>
-                    <a href="{% url 'notes:note' i.id %}">{{ i.label }}</a>
-                    ({{ i.created_at|date:"d.m.y H:i" }})
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No recent notes</p>
-    {% endif %}
-</section>
+    <section class="dashboard-section dashboard-notes-section">
+        <h2>Recent Notes</h2>
+        {% if recent_notes %}
+            <ul class="dashboard-list dashboard-notes-list">
+                {% for i in recent_notes %}
+                    <li class="dashboard-note-card">
+                        <a class="dashboard-note-link" href="{% url 'notes:note' i.id %}">{{ i.label }}</a>
+                        <span class="dashboard-note-created">{{ i.created_at|date:"d.m.y H:i" }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="dashboard-empty">No recent notes</p>
+        {% endif %}
+    </section>
+</div>
 {% endblock content %}
