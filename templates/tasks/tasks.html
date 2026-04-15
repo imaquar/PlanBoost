@@ -1,28 +1,53 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Tasks{% endblock title %}
+{% block body_class %}tasks-page{% endblock body_class %}
 {% block title_h1 %}Tasks{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=4">{% endblock css %}
 {% block content %}
-    <a href="{% url 'tasks:tasks' %}">Active</a>
-    <a href="{% url 'tasks:tasks' %}?show=completed">Completed</a>
-    <br>
-    <br>
-    {% if task %}
-        {% for i in task %}
-            <div style="display:flex; align-items:center; gap:8px;">
-                <form method="post" action="{% url 'tasks:toggle_status' i.id %}" style="width:auto;display:inline-flex;align-items:center;margin:0;">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                    <input type="checkbox" name="status" {% if i.status %}checked{% endif %} onchange="this.form.submit()">
-                </form>
-                <a href="{% url 'tasks:task' i.id %}?next={{ request.get_full_path|urlencode }}">{{ i.label }}</a>
+    <div class="tasks-list-layout">
+        <div class="tasks-status-switch">
+            <a class="tasks-switch-link {% if not show_completed %}is-active{% endif %}" href="{% if sort %}{% url 'tasks:tasks' %}?sort={{ sort }}{% else %}{% url 'tasks:tasks' %}{% endif %}">active</a>
+            <a class="tasks-switch-link {% if show_completed %}is-active{% endif %}" href="{% if sort %}{% url 'tasks:tasks' %}?show=completed&sort={{ sort }}{% else %}{% url 'tasks:tasks' %}?show=completed{% endif %}">completed</a>
+        </div>
+        {% if task %}
+            <ul class="tasks-list">
+                {% for i in task %}
+                    <li class="tasks-list-item">
+                        <form class="tasks-toggle-form" method="post" action="{% url 'tasks:toggle_status' i.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <input type="checkbox" name="status" {% if i.status %}checked{% endif %} onchange="this.form.submit()">
+                        </form>
+                        <a class="tasks-item-link" href="{% url 'tasks:task' i.id %}?next={{ request.get_full_path|urlencode }}">{{ i.label }}</a>
+                        <span class="tasks-item-time">
+                            {% if show_completed and i.completed_at %}
+                                {{ i.completed_at|date:"d.m.y H:i" }}
+                            {% else %}
+                                {{ i.deadline|date:"d.m.y H:i" }}
+                            {% endif %}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="tasks-empty">no tasks yet</p>
+        {% endif %}
+        <div class="tasks-actions">
+            <form class="tasks-create-form" method="get" action="{% url 'tasks:create' %}">
+                <button type="submit">create task</button>
+            </form>
+            <div class="tasks-sort-menu">
+                <button class="tasks-sort-trigger" type="button">sort</button>
+                <ul class="tasks-sort-dropdown">
+                    <li>
+                        <a class="tasks-sort-link {% if sort == 'deadline' %}is-active{% endif %}" href="{% if show_completed %}?show=completed&sort=deadline{% else %}?sort=deadline{% endif %}">deadline</a>
+                    </li>
+                    <li>
+                        <a class="tasks-sort-link {% if sort == 'priority' %}is-active{% endif %}" href="{% if show_completed %}?show=completed&sort=priority{% else %}?sort=priority{% endif %}">priority</a>
+                    </li>
+                </ul>
             </div>
-        {% endfor %}
-    {% endif %}
-    <a href="?show={% if show_completed %}completed{% endif %}&sort=deadline">Sort by deadline</a>
-    <a href="?show={% if show_completed %}completed{% endif %}&sort=priority">Sort by priority</a>
-    <br>
-    <br>
-    <form method="get" action="{% url 'tasks:create' %}" style="display:inline;">
-        <button type="submit">Create Task</button>
-    </form>
+        </div>
+    </div>
 {% endblock content %}
