@@ -1,13 +1,27 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Tasks{% endblock title %}
+{% block body_class %}tasks-page tasks-form-page tasks-edit-page{% endblock body_class %}
 {% block title_h1 %}{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=7">{% endblock css %}
 {% block content %}
-    <form method="POST" style="display:inline;">
-        {% csrf_token %}
-        {{ form }}<br>
-        <button type="submit">Update</button>
-    </form>
-    <form method="get" action="{% url 'tasks:task' task.id %}" style="display:inline;">
-        <button type="submit">Cancel</button>
-    </form>
+    <div class="tasks-form-layout">
+        <form method="post" id="task-edit-form" class="tasks-form-shell">
+            {% csrf_token %}
+            <div class="tasks-form-field">{{ form.label }}</div>
+            <div class="tasks-form-row">
+                <div class="tasks-form-field">{{ form.deadline }}</div>
+                <div class="tasks-form-field">{{ form.priority }}</div>
+            </div>
+            <div class="tasks-form-field">{{ form.description }}</div>
+        </form>
+        <div class="tasks-form-actions">
+            <button type="submit" form="task-edit-form">update</button>
+            <form method="get" action="{% url 'tasks:task' task.id %}" class="tasks-form-action-form">
+                <button type="submit">cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'tasks/js/task_form.js' %}?v=1"></script>
 {% endblock content %}
