@@ -1,26 +1,28 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Timer{% endblock title %}
+{% block body_class %}timer-page{% endblock body_class %}
 {% block title_h1 %}Timer{% endblock title_h1 %}
+{% block css %}<link rel="stylesheet" href="{% static 'timer/css/style.css' %}?v=5">{% endblock css %}
 {% block content %}
 <section id="timer-shell" class="timer-shell">
     <h2 id="timer-display" class="timer-display">30:00</h2>
-    <p id="timer-mode" class="timer-mode">work</p>
 
     <div class="timer-controls">
-        <button id="start-button" type="button">Start</button>
-        <button id="pause-button" type="button">Pause</button>
-        <button id="reset-button" type="button">Reset</button>
-        <button id="set-button" type="button">Set</button>
+        <button id="start-button" type="button">start</button>
+        <button id="pause-button" type="button">pause</button>
+        <button id="reset-button" type="button">reset</button>
+        <button id="set-button" type="button">set</button>
+        <p id="timer-mode" class="timer-mode">work</p>
     </div>
 
-    <form id="timer-set-form" hidden>
-        <label for="work-input">Work (m:s)</label>
+    <form id="timer-set-form" class="timer-set-form" hidden>
+        <label for="work-input">work (m:s)</label>
         <input id="work-input" name="work" type="text" placeholder="30:00" />
-        <label for="break-input">Break (m:s)</label>
+        <label for="break-input">break (m:s)</label>
         <input id="break-input" name="break" type="text" placeholder="05:00" />
-        <button id="apply-set-button" type="submit">Apply</button>
-        <button id="cancel-set-button" type="button">Cancel</button>
+        <button id="apply-set-button" type="submit">apply</button>
+        <button id="cancel-set-button" type="button">cancel</button>
     </form>
 </section>
 <script src="{% static 'timer/js/timer.js' %}"></script>
