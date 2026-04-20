@@ -1,0 +1,121 @@
+.timer-page .page-title {
+    text-align: center;
+}
+
+.timer-shell {
+    width: min(74rem, 100%);
+    margin: 0 auto;
+    padding-bottom: 2rem;
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+}
+
+.timer-display,
+.timer-controls,
+.timer-set-form {
+    width: min(56rem, 100%);
+}
+
+.timer-display {
+    margin: 0;
+    border: 0.0625rem solid var(--glass-border);
+    border-radius: 28px;
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(3px);
+    color: var(--header-text);
+    text-align: center;
+    font-size: clamp(5rem, 16vw, 11rem);
+    letter-spacing: 0.06em;
+    padding: 1.3rem 1rem;
+    min-height: clamp(18rem, 56vh, 38rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.05;
+}
+
+.timer-controls {
+    display: flex;
+    align-items: stretch;
+    gap: 0.65rem;
+}
+
+.timer-controls button {
+    flex: 0 0 6.4rem;
+    min-height: 42px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.timer-mode {
+    flex: 1 1 auto;
+    min-height: 42px;
+    margin: 0;
+    border: 0.0625rem solid var(--glass-border);
+    border-radius: 28px;
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(3px);
+    color: var(--header-text);
+    font: inherit;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-transform: lowercase;
+    user-select: none;
+    padding: 0 0.8rem;
+}
+
+.timer-set-form {
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.timer-set-form[hidden] {
+    display: none;
+}
+
+.timer-set-form label {
+    margin: 0;
+    min-height: 2.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--header-text);
+    font-weight: 700;
+}
+
+.timer-set-form input {
+    width: 100%;
+    min-height: 2.8rem;
+    border: 0.0625rem solid var(--glass-border);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.45);
+    color: var(--color-text);
+    padding: 0.65rem 0.85rem;
+    font: inherit;
+    line-height: 1.4;
+}
+
+.timer-set-form input:focus {
+    outline: none;
+    border-color: var(--header-text);
+}
+
+.timer-set-form button {
+    min-height: 42px;
+    margin: 0;
+}
