@@ -62,6 +62,41 @@ class UserRegistrationFormTests(TestCase):
         self.assertRedirects(response, reverse('users:login'))
         self.assertTrue(User.objects.filter(username='newuser02').exists())
 
+    def test_register_post_with_empty_data_does_not_create_user(self):
+        users_before = User.objects.count()
+
+        response = self.client.post(reverse('users:register'), data={})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'registration/register.html')
+        self.assertEqual(User.objects.count(), users_before)
+
+    def test_register_post_with_password_mismatch_does_not_create_user(self):
+        users_before = User.objects.count()
+
+        response = self.client.post(
+            reverse('users:register'),
+            data={'username': 'newuser05', 'password1': 'StrongPass123', 'password2': 'StrongPass124',},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'registration/register.html')
+        self.assertEqual(User.objects.count(), users_before)
+        self.assertFalse(User.objects.filter(username='newuser05').exists())
+
+    def test_register_post_with_password_without_digit_does_not_create_user(self):
+        users_before = User.objects.count()
+
+        response = self.client.post(
+            reverse('users:register'),
+            data={'username': 'newuser06', 'password1': 'StrongPassword', 'password2': 'StrongPassword',},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'registration/register.html')
+        self.assertEqual(User.objects.count(), users_before)
+        self.assertFalse(User.objects.filter(username='newuser06').exists())
+
 
 class UserLoginLogoutTests(TestCase):
     def setUp(self):
