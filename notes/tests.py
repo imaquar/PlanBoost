@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
 
+from .forms import NoteForm
 from .models import Note
 
 
@@ -47,3 +48,38 @@ class NotesListViewTests(TestCase):
         self.assertIn(own_note, response.context['note'])
         self.assertContains(response, 'Owner note')
         self.assertNotContains(response, 'Other note')
+
+
+class NoteCreationFormAndViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='notecreator', password='StrongPass123',)
+
+    def test_note_form_is_valid_with_correct_data(self):
+        form = NoteForm(
+            data={'label': 'Created title', 'text': 'Created text',}
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_note_form_is_invalid_without_required_label(self):
+        form = NoteForm(
+            data={'label': '', 'text': 'Created text',}
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('label', form.errors)
+
+    def test_create_note_view_saves_note_for_current_user(self):
+        self.client.login(username='notecreator', password='StrongPass123')
+
+        response = self.client.post(
+            reverse('notes:create'),
+            data={'label': 'View created title', 'text': 'View created text',},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/notes/')
+
+        created_note = Note.objects.get(label='View created title')
+        self.assertEqual(created_note.text, 'View created text')
+        self.assertEqual(created_note.user, self.user)
