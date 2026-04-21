@@ -37,6 +37,15 @@ class NotesListViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'notes/notes.html')
 
+    def test_anonymous_user_is_redirected_to_login_for_notes_list(self):
+        notes_url = reverse('notes:notes')
+        login_url = reverse('login')
+
+        response = self.client.get(notes_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'{login_url}?next={notes_url}')
+
     def test_notes_list_contains_only_current_user_notes(self):
         own_note = Note.objects.create(label='Owner note', text='Owner text', user=self.user,)
         Note.objects.create(label='Other note', text='Other text', user=self.other_user,)
