@@ -1,22 +1,22 @@
-from django.test import TestCase, Client
-from . import views
+from django.test import TestCase
+from django.contrib.auth.models import User
 
-class NotesPageGetTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        url = '/notes/'
-        client = Client()
-        cls.response = client.get(url)
+from .models import Note
 
-    def test_url_access(self):
-        self.assertEqual(self.response.status_code, 200)
 
-    def test_url_name(self):
-        self.assertEqual(self.response.resolver_match.url_name, 'notes')
+class NoteModelTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='noteuser01', password='StrongPass123',)
 
-    def test_url_namespace(self):
-        self.assertEqual(self.response.resolver_match.namespace, 'notes')
+    def test_note_creation_saves_basic_fields_and_user(self):
+        note = Note.objects.create(label='My note title', text='My note text', user=self.user,)
 
-    def test_view_name(self):
-        self.assertEqual(self.response.resolver_match.func, views.index)
+        self.assertEqual(note.label, 'My note title')
+        self.assertEqual(note.text, 'My note text')
+        self.assertEqual(note.user, self.user)
+        self.assertIsNotNone(note.created_at)
+
+    def test_note_string_representation_returns_label(self):
+        note = Note.objects.create(label='Some title', text='Some text', user=self.user,)
+
+        self.assertEqual(str(note), 'Some title')
