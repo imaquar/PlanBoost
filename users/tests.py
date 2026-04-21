@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from urllib.parse import quote
 
-from .forms import RegisterForm
+from .forms import RegisterForm, LoginForm
 
 
 class AuthenticationPagesTests(TestCase):
@@ -165,3 +165,25 @@ class LoginRequiredAccessTests(TestCase):
 
                 self.assertEqual(response.status_code, 302)
                 self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
+
+
+class UserLoginFormTests(TestCase):
+    def setUp(self):
+        self.username = 'loginform01'
+        self.password = 'StrongPass123'
+        self.user = User.objects.create_user(username=self.username, password=self.password,)
+
+    def test_login_form_is_valid_with_correct_credentials(self):
+        form = LoginForm(
+            data={'username': self.username, 'password': self.password,}
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_login_form_is_invalid_with_wrong_password(self):
+        form = LoginForm(
+            data={'username': self.username, 'password': 'WrongPassword999',}
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('__all__', form.errors)
