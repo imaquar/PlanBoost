@@ -28,6 +28,30 @@ class UserRegistrationFormTests(TestCase):
 
         self.assertTrue(form.is_valid(), form.errors)
 
+    def test_register_form_is_invalid_without_required_fields(self):
+        form = RegisterForm(data={})
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('username', form.errors)
+        self.assertIn('password1', form.errors)
+        self.assertIn('password2', form.errors)
+
+    def test_register_form_is_invalid_when_passwords_do_not_match(self):
+        form = RegisterForm(
+            data={'username': 'newuser03', 'password1': 'StrongPass123', 'password2': 'StrongPass124',}
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('password2', form.errors)
+
+    def test_register_form_is_invalid_when_password_has_no_digit(self):
+        form = RegisterForm(
+            data={'username': 'newuser04', 'password1': 'StrongPassword', 'password2': 'StrongPassword',}
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('digit', str(form.errors).lower())
+
     def test_register_post_creates_user_with_correct_data(self):
         response = self.client.post(
             reverse('users:register'),
