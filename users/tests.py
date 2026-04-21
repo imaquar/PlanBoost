@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
+from urllib.parse import quote
 
 from .forms import RegisterForm
 
@@ -71,3 +72,24 @@ class UserLoginLogoutTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '/users/login/')
         self.assertNotIn('_auth_user_id', self.client.session)
+
+
+class LoginRequiredAccessTests(TestCase):
+    def test_protected_pages_redirect_to_login_for_anonymous_user(self):
+        protected_urls = [
+            reverse('dashboard:dashboard'),
+            reverse('notes:notes'),
+            reverse('tasks:tasks'),
+            reverse('timer:timer'),
+            reverse('users:profile'),
+        ]
+
+        login_url = reverse('users:login')
+
+        for url in protected_urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                expected_redirect = f'{login_url}?next={quote(url, safe="/")}'
+
+                self.assertEqual(response.status_code, 302)
+                self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
