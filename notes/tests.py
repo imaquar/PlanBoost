@@ -83,3 +83,39 @@ class NoteCreationFormAndViewTests(TestCase):
         created_note = Note.objects.get(label='View created title')
         self.assertEqual(created_note.text, 'View created text')
         self.assertEqual(created_note.user, self.user)
+
+
+class NoteEditingTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='noteowner', password='StrongPass123',)
+        self.other_user = User.objects.create_user(username='noteintruder', password='StrongPass123',)
+        self.note = Note.objects.create(label='Original title', text='Original text', user=self.owner,)
+
+    def test_owner_can_edit_own_note(self):
+        self.client.login(username='noteowner', password='StrongPass123')
+
+        response = self.client.post(
+            reverse('notes:edit', args=[self.note.id]),
+            data={'label': 'Updated title', 'text': 'Updated text',},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'/notes/note/{self.note.id}/')
+
+        self.note.refresh_from_db()
+        self.assertEqual(self.note.label, 'Updated title')
+        self.assertEqual(self.note.text, 'Updated text')
+
+    def test_other_user_cannot_edit_foreign_note(self):
+        self.client.login(username='noteintruder', password='StrongPass123')
+
+        response = self.client.post(
+            reverse('notes:edit', args=[self.note.id]),
+            data={'label': 'Hacked title', 'text': 'Hacked text',},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        self.note.refresh_from_db()
+        self.assertEqual(self.note.label, 'Original title')
+        self.assertEqual(self.note.text, 'Original text')
