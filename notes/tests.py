@@ -63,6 +63,15 @@ class NoteCreationFormAndViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='notecreator', password='StrongPass123',)
 
+    def test_create_note_page_is_available_with_get(self):
+        self.client.login(username='notecreator', password='StrongPass123')
+
+        response = self.client.get(reverse('notes:create'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'notes/create.html')
+        self.assertIn('form', response.context)
+
     def test_note_form_is_valid_with_correct_data(self):
         form = NoteForm(
             data={'label': 'Created title', 'text': 'Created text',}
