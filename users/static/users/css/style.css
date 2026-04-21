@@ -87,7 +87,7 @@
 .auth-errors {
     width: min(28rem, 100%);
     margin: 0 auto 1rem;
-    color: #8d1111;
+    color: var(--color-danger);
     font-weight: 600;
 }
 
@@ -215,7 +215,7 @@
 
 .profile-errors {
     width: min(28rem, 100%);
-    color: #8d1111;
+    color: var(--color-danger);
     font-weight: 600;
     text-align: center;
 }

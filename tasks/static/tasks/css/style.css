@@ -331,7 +331,7 @@
     margin: 0;
     border: 0.0625rem solid var(--glass-border);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.45);
+    background: var(--input-bg);
     color: var(--color-text);
     padding: 0.65rem 0.85rem;
     font: inherit;
