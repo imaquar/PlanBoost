@@ -132,6 +132,19 @@ class UserLoginLogoutTests(TestCase):
         self.assertRedirects(response, '/users/login/')
         self.assertNotIn('_auth_user_id', self.client.session)
 
+    def test_after_logout_protected_page_requires_login(self):
+        self.client.login(username=self.username, password=self.password)
+        self.client.post(reverse('logout'))
+
+        protected_url = reverse('dashboard:dashboard')
+        login_url = reverse('users:login')
+        expected_redirect = f'{login_url}?next={quote(protected_url, safe="/")}'
+
+        response = self.client.get(protected_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
+
 
 class LoginRequiredAccessTests(TestCase):
     def test_protected_pages_redirect_to_login_for_anonymous_user(self):
