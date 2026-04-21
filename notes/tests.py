@@ -119,3 +119,27 @@ class NoteEditingTests(TestCase):
         self.note.refresh_from_db()
         self.assertEqual(self.note.label, 'Original title')
         self.assertEqual(self.note.text, 'Original text')
+
+
+class NoteDeletionTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='deleteowner', password='StrongPass123',)
+        self.other_user = User.objects.create_user(username='deleteintruder', password='StrongPass123',)
+        self.note = Note.objects.create(label='Delete me', text='Delete text', user=self.owner,)
+
+    def test_owner_can_delete_own_note(self):
+        self.client.login(username='deleteowner', password='StrongPass123')
+
+        response = self.client.post(reverse('notes:delete', args=[self.note.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/notes/')
+        self.assertFalse(Note.objects.filter(id=self.note.id).exists())
+
+    def test_other_user_cannot_delete_foreign_note(self):
+        self.client.login(username='deleteintruder', password='StrongPass123')
+
+        response = self.client.post(reverse('notes:delete', args=[self.note.id]))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Note.objects.filter(id=self.note.id).exists())
