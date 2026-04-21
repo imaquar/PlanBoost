@@ -164,7 +164,7 @@
     height: calc((var(--count) * 14px) + 6px);
     min-height: 8px;
     border-radius: 10px 10px 6px 6px;
-    background: linear-gradient(180deg, rgba(44, 44, 44, 0.88) 0%, rgba(44, 44, 44, 0.55) 100%);
+    background: linear-gradient(180deg, var(--stats-bar-from) 0%, var(--stats-bar-to) 100%);
 }
 
 .stats-bar-value {
