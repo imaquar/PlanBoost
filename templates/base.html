@@ -5,6 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/a533a36acf.js" crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            const storageKey = 'planboost-theme';
+            const dark = 'dark';
+            const light = 'light';
+            let theme = null;
+
+            try {
+                const saved = localStorage.getItem(storageKey);
+                if (saved === dark || saved === light) {
+                    theme = saved;
+                }
+            } catch {}
+
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? dark : light;
+            }
+
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <title>{% block title %}PlanBoost{% endblock title %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block css %}{% endblock css %}
@@ -61,5 +82,6 @@
             PlanBoost © 2026
         </div>
     </footer>
+    <script src="{% static 'js/theme.js' %}?v=2"></script>
 </body>
 </html>
