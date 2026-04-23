@@ -187,3 +187,26 @@ class UserLoginFormTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn('__all__', form.errors)
+
+
+class ProfilePageAccessTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='profileuser01', password='StrongPass123',)
+
+    def test_anonymous_user_is_redirected_to_login_for_profile_page(self):
+        profile_url = reverse('users:profile')
+        login_url = reverse('users:login')
+
+        response = self.client.get(profile_url)
+        expected_redirect = f'{login_url}?next={quote(profile_url, safe="/")}'
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
+
+    def test_authenticated_user_can_open_profile_page(self):
+        self.client.login(username='profileuser01', password='StrongPass123')
+
+        response = self.client.get(reverse('users:profile'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'registration/profile.html')
