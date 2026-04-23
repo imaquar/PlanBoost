@@ -210,3 +210,23 @@ class ProfilePageAccessTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/profile.html')
+
+
+class ProfilePageContextTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='profilecontext01', password='StrongPass123',)
+        self.other_user = User.objects.create_user(username='profilecontext02', password='StrongPass123',)
+
+    def test_profile_page_context_contains_current_user_forms_and_data(self):
+        self.client.login(username='profilecontext01', password='StrongPass123')
+
+        response = self.client.get(reverse('users:profile'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('user_form', response.context)
+        self.assertIn('profile_form', response.context)
+        self.assertEqual(response.context['user_form'].instance, self.user)
+        self.assertEqual(response.context['profile_form'].instance, self.user.profile)
+        self.assertContains(response, self.user.username)
+        self.assertContains(response, self.user.profile.avatar.url)
+        self.assertNotContains(response, self.other_user.username)
