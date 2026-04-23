@@ -253,3 +253,51 @@ class TaskFilteringAndSortingTests(TestCase):
         self.assertEqual(response.status_code, 200)
         tasks = list(response.context['task'])
         self.assertEqual(tasks, [self.active_high_early, self.active_high_late, self.active_low])
+
+
+class TaskStatisticsTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='taskstatsowner', password='testpass123',)
+        self.other_user = get_user_model().objects.create_user(username='taskstatsother', password='testpass123',)
+
+    def _local_noon(self, days_ago):
+        from datetime import datetime, time
+
+        day = timezone.localdate() - timedelta(days=days_ago)
+        naive = datetime.combine(day, time(hour=12, minute=0))
+        return timezone.make_aware(naive, timezone.get_current_timezone())
+
+    def test_statistics_counts_today_and_last_7_days_correctly(self):
+        from .services import get_task_completion_stats
+
+        Task.objects.create(label='Today 1', description='A', priority=1, deadline=timezone.now() + timedelta(days=1),
+            status=True, completed_at=self._local_noon(0), user=self.user,)
+        Task.objects.create(label='Today 2', description='B', priority=2, deadline=timezone.now() + timedelta(days=1),
+            status=True, completed_at=self._local_noon(0), user=self.user,)
+        Task.objects.create(label='Yesterday', description='C', priority=2, deadline=timezone.now() + timedelta(days=1),
+            status=True, completed_at=self._local_noon(1), user=self.user,)
+        Task.objects.create(label='Six days ago', description='D', priority=3, deadline=timezone.now() + timedelta(days=1),
+            status=True, completed_at=self._local_noon(6), user=self.user,)
+
+        Task.objects.create(label='Too old', description='E', priority=3, deadline=timezone.now() + timedelta(days=1),
+            status=True, completed_at=self._local_noon(8), user=self.user,)
+        Task.objects.create(label='Other user today', description='F', priority=1, deadline=timezone.now() + timedelta(days=1),
+            status=True, completed_at=self._local_noon(0), user=self.other_user,)
+        Task.objects.create(label='Not completed', description='G', priority=1, deadline=timezone.now() + timedelta(days=1),
+            status=False, completed_at=self._local_noon(0), user=self.user,)
+
+        stats = get_task_completion_stats(self.user)
+
+        self.assertEqual(stats['today_done_count'], 2)
+        self.assertEqual(stats['last_7_days_done_counts'], [1, 0, 0, 0, 0, 1, 2])
+
+    def test_statistics_returns_zeros_when_no_completed_tasks(self):
+        from .services import get_task_completion_stats
+
+        Task.objects.create(label='Active only', description='X', priority=1, deadline=timezone.now() + timedelta(days=1),
+            status=False, user=self.user,)
+
+        stats = get_task_completion_stats(self.user)
+
+        self.assertEqual(stats['today_done_count'], 0)
+        self.assertEqual(stats['last_7_days_done_counts'], [0, 0, 0, 0, 0, 0, 0])
