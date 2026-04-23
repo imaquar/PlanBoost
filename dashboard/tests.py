@@ -92,3 +92,49 @@ class DashboardTasksContextTests(TestCase):
         self.assertTrue(all(t.user_id == self.user.id for t in upcoming_tasks))
         self.assertTrue(all(t.status is False for t in upcoming_tasks))
         self.assertTrue(all(t.deadline >= timezone.now() for t in upcoming_tasks))
+
+
+class DashboardStatisticsTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='dashboard_stats_user', password='testpass123',)
+        self.other_user = get_user_model().objects.create_user(username='dashboard_stats_other', password='testpass123',)
+
+    def _local_noon(self, days_ago):
+        from datetime import datetime, time
+
+        day = timezone.localdate() - timedelta(days=days_ago)
+        naive = datetime.combine(day, time(hour=12, minute=0))
+        return timezone.make_aware(naive, timezone.get_current_timezone())
+
+    def _create_completed_task(self, user, label, days_ago):
+        return Task.objects.create(label=label, description=f'{label} description', priority=2,
+            deadline=timezone.now() + timedelta(days=1), status=True, completed_at=self._local_noon(days_ago), user=user,)
+
+    def test_dashboard_context_contains_correct_productivity_stats(self):
+        self._create_completed_task(self.user, 'Today one', 0)
+        self._create_completed_task(self.user, 'Today two', 0)
+        self._create_completed_task(self.user, 'Yesterday one', 1)
+        self._create_completed_task(self.user, 'Six days ago one', 6)
+
+        self._create_completed_task(self.user, 'Too old', 8)
+        self._create_completed_task(self.other_user, 'Other user today', 0)
+        Task.objects.create(label='Not completed', description='Not completed description', priority=1,
+            deadline=timezone.now() + timedelta(days=1), status=False, completed_at=self._local_noon(0), user=self.user,)
+
+        self.client.login(username='dashboard_stats_user', password='testpass123')
+        response = self.client.get(reverse('dashboard:dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['today_done_count'], 2)
+        self.assertEqual(response.context['last_7_days_done_counts'], [1, 0, 0, 0, 0, 1, 2])
+
+    def test_dashboard_context_returns_zero_stats_without_completed_tasks(self):
+        Task.objects.create(label='Only active task', description='Only active description', priority=1,
+            deadline=timezone.now() + timedelta(days=1), status=False, user=self.user,)
+
+        self.client.login(username='dashboard_stats_user', password='testpass123')
+        response = self.client.get(reverse('dashboard:dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['today_done_count'], 0)
+        self.assertEqual(response.context['last_7_days_done_counts'], [0, 0, 0, 0, 0, 0, 0])
