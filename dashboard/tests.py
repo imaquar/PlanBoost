@@ -5,6 +5,7 @@ from django.urls import reverse
 from datetime import timedelta
 from django.utils import timezone
 from notes.models import Note
+from tasks.models import Task
 
 
 class DashboardAccessTests(TestCase):
@@ -58,3 +59,36 @@ class DashboardNotesContextTests(TestCase):
         self.assertNotIn(own_oldest, recent_notes)
         self.assertNotIn(other_newest, recent_notes)
         self.assertTrue(all(n.user_id == self.user.id for n in recent_notes))
+
+
+class DashboardTasksContextTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='dashboard_tasks_user', password='testpass123',)
+        self.other_user = get_user_model().objects.create_user(username='dashboard_tasks_other', password='testpass123',)
+
+    def _create_task(self, user, label, hours_delta, status=False):
+        return Task.objects.create(label=label, description=f'{label} description', priority=2,
+            deadline=timezone.now() + timedelta(hours=hours_delta), status=status, user=user,)
+
+    def test_dashboard_context_contains_upcoming_tasks_for_current_user_only(self):
+        own_near = self._create_task(self.user, 'Own near', 1)
+        own_middle = self._create_task(self.user, 'Own middle', 3)
+        own_far = self._create_task(self.user, 'Own far', 5)
+        own_extra = self._create_task(self.user, 'Own extra', 7)
+
+        self._create_task(self.user, 'Own completed', 2, status=True)
+        self._create_task(self.user, 'Own past', -1)
+        self._create_task(self.other_user, 'Other near', 0.5)
+
+        self.client.login(username='dashboard_tasks_user', password='testpass123')
+        response = self.client.get(reverse('dashboard:dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        upcoming_tasks = list(response.context['upcoming_tasks'])
+
+        self.assertEqual(len(upcoming_tasks), 3)
+        self.assertEqual([t.label for t in upcoming_tasks], [own_near.label, own_middle.label, own_far.label])
+        self.assertNotIn(own_extra, upcoming_tasks)
+        self.assertTrue(all(t.user_id == self.user.id for t in upcoming_tasks))
+        self.assertTrue(all(t.status is False for t in upcoming_tasks))
+        self.assertTrue(all(t.deadline >= timezone.now() for t in upcoming_tasks))
