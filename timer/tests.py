@@ -23,3 +23,22 @@ class TimerPageAccessTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'timer/timer.html')
+
+
+class TimerTemplateRenderingTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='timer_template_user', password='testpass123',)
+
+    def test_timer_page_returns_status_200(self):
+        self.client.login(username='timer_template_user', password='testpass123')
+
+        response = self.client.get(reverse('timer:timer'))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_timer_page_uses_timer_template(self):
+        self.client.login(username='timer_template_user', password='testpass123')
+
+        response = self.client.get(reverse('timer:timer'))
+
+        self.assertTemplateUsed(response, 'timer/timer.html')
