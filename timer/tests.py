@@ -1,22 +1,44 @@
-from django.test import TestCase, Client
-from . import views
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 
-class TimerPageGetTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        url = '/timer/'
-        client = Client()
-        cls.response = client.get(url)
 
-    def test_url_access(self):
-        self.assertEqual(self.response.status_code, 200)
+class TimerPageAccessTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='timer_user', password='testpass123',)
 
-    def test_url_name(self):
-        self.assertEqual(self.response.resolver_match.url_name, 'timer')
+    def test_anonymous_user_is_redirected_to_login(self):
+        timer_url = reverse('timer:timer')
+        login_url = reverse('login')
 
-    def test_url_namespace(self):
-        self.assertEqual(self.response.resolver_match.namespace, 'timer')
+        response = self.client.get(timer_url)
 
-    def test_view_name(self):
-        self.assertEqual(self.response.resolver_match.func, views.index)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'{login_url}?next={timer_url}')
+
+    def test_authenticated_user_can_open_timer_page(self):
+        self.client.login(username='timer_user', password='testpass123')
+
+        response = self.client.get(reverse('timer:timer'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'timer/timer.html')
+
+
+class TimerTemplateRenderingTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='timer_template_user', password='testpass123',)
+
+    def test_timer_page_returns_status_200(self):
+        self.client.login(username='timer_template_user', password='testpass123')
+
+        response = self.client.get(reverse('timer:timer'))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_timer_page_uses_timer_template(self):
+        self.client.login(username='timer_template_user', password='testpass123')
+
+        response = self.client.get(reverse('timer:timer'))
+
+        self.assertTemplateUsed(response, 'timer/timer.html')

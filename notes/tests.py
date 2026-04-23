@@ -1,22 +1,163 @@
-from django.test import TestCase, Client
-from . import views
+from django.test import TestCase
+from django.contrib.auth.models import User
+from django.urls import reverse
 
-class NotesPageGetTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        url = '/notes/'
-        client = Client()
-        cls.response = client.get(url)
+from .forms import NoteForm
+from .models import Note
 
-    def test_url_access(self):
-        self.assertEqual(self.response.status_code, 200)
 
-    def test_url_name(self):
-        self.assertEqual(self.response.resolver_match.url_name, 'notes')
+class NoteModelTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='noteuser01', password='StrongPass123',)
 
-    def test_url_namespace(self):
-        self.assertEqual(self.response.resolver_match.namespace, 'notes')
+    def test_note_creation_saves_basic_fields_and_user(self):
+        note = Note.objects.create(label='My note title', text='My note text', user=self.user,)
 
-    def test_view_name(self):
-        self.assertEqual(self.response.resolver_match.func, views.index)
+        self.assertEqual(note.label, 'My note title')
+        self.assertEqual(note.text, 'My note text')
+        self.assertEqual(note.user, self.user)
+        self.assertIsNotNone(note.created_at)
+
+    def test_note_string_representation_returns_label(self):
+        note = Note.objects.create(label='Some title', text='Some text', user=self.user,)
+
+        self.assertEqual(str(note), 'Some title')
+
+
+class NotesListViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='notesowner', password='StrongPass123',)
+        self.other_user = User.objects.create_user(username='othernotes', password='StrongPass123',)
+
+    def test_authenticated_user_can_open_notes_list(self):
+        self.client.login(username='notesowner', password='StrongPass123')
+
+        response = self.client.get(reverse('notes:notes'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'notes/notes.html')
+
+    def test_anonymous_user_is_redirected_to_login_for_notes_list(self):
+        notes_url = reverse('notes:notes')
+        login_url = reverse('login')
+
+        response = self.client.get(notes_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'{login_url}?next={notes_url}')
+
+    def test_notes_list_contains_only_current_user_notes(self):
+        own_note = Note.objects.create(label='Owner note', text='Owner text', user=self.user,)
+        Note.objects.create(label='Other note', text='Other text', user=self.other_user,)
+        self.client.login(username='notesowner', password='StrongPass123')
+
+        response = self.client.get(reverse('notes:notes'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(own_note, response.context['note'])
+        self.assertContains(response, 'Owner note')
+        self.assertNotContains(response, 'Other note')
+
+
+class NoteCreationFormAndViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='notecreator', password='StrongPass123',)
+
+    def test_create_note_page_is_available_with_get(self):
+        self.client.login(username='notecreator', password='StrongPass123')
+
+        response = self.client.get(reverse('notes:create'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'notes/create.html')
+        self.assertIn('form', response.context)
+
+    def test_note_form_is_valid_with_correct_data(self):
+        form = NoteForm(
+            data={'label': 'Created title', 'text': 'Created text',}
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_note_form_is_invalid_without_required_label(self):
+        form = NoteForm(
+            data={'label': '', 'text': 'Created text',}
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('label', form.errors)
+
+    def test_create_note_view_saves_note_for_current_user(self):
+        self.client.login(username='notecreator', password='StrongPass123')
+
+        response = self.client.post(
+            reverse('notes:create'),
+            data={'label': 'View created title', 'text': 'View created text',},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/notes/')
+
+        created_note = Note.objects.get(label='View created title')
+        self.assertEqual(created_note.text, 'View created text')
+        self.assertEqual(created_note.user, self.user)
+
+
+class NoteEditingTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='noteowner', password='StrongPass123',)
+        self.other_user = User.objects.create_user(username='noteintruder', password='StrongPass123',)
+        self.note = Note.objects.create(label='Original title', text='Original text', user=self.owner,)
+
+    def test_owner_can_edit_own_note(self):
+        self.client.login(username='noteowner', password='StrongPass123')
+
+        response = self.client.post(
+            reverse('notes:edit', args=[self.note.id]),
+            data={'label': 'Updated title', 'text': 'Updated text',},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'/notes/note/{self.note.id}/')
+
+        self.note.refresh_from_db()
+        self.assertEqual(self.note.label, 'Updated title')
+        self.assertEqual(self.note.text, 'Updated text')
+
+    def test_other_user_cannot_edit_foreign_note(self):
+        self.client.login(username='noteintruder', password='StrongPass123')
+
+        response = self.client.post(
+            reverse('notes:edit', args=[self.note.id]),
+            data={'label': 'Hacked title', 'text': 'Hacked text',},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        self.note.refresh_from_db()
+        self.assertEqual(self.note.label, 'Original title')
+        self.assertEqual(self.note.text, 'Original text')
+
+
+class NoteDeletionTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='deleteowner', password='StrongPass123',)
+        self.other_user = User.objects.create_user(username='deleteintruder', password='StrongPass123',)
+        self.note = Note.objects.create(label='Delete me', text='Delete text', user=self.owner,)
+
+    def test_owner_can_delete_own_note(self):
+        self.client.login(username='deleteowner', password='StrongPass123')
+
+        response = self.client.post(reverse('notes:delete', args=[self.note.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/notes/')
+        self.assertFalse(Note.objects.filter(id=self.note.id).exists())
+
+    def test_other_user_cannot_delete_foreign_note(self):
+        self.client.login(username='deleteintruder', password='StrongPass123')
+
+        response = self.client.post(reverse('notes:delete', args=[self.note.id]))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Note.objects.filter(id=self.note.id).exists())
