@@ -1,22 +1,25 @@
-from django.test import TestCase, Client
-from . import views
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 
-class DashboardPageGetTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        url = '/'
-        client = Client()
-        cls.response = client.get(url)
 
-    def test_url_access(self):
-        self.assertEqual(self.response.status_code, 200)
+class DashboardAccessTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='dashboard_user', password='testpass123',)
 
-    def test_url_name(self):
-        self.assertEqual(self.response.resolver_match.url_name, 'dashboard')
+    def test_anonymous_user_is_redirected_to_login(self):
+        dashboard_url = reverse('dashboard:dashboard')
+        login_url = reverse('login')
 
-    def test_url_namespace(self):
-        self.assertEqual(self.response.resolver_match.namespace, 'dashboard')
+        response = self.client.get(dashboard_url)
 
-    def test_view_name(self):
-        self.assertEqual(self.response.resolver_match.func, views.index)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'{login_url}?next={dashboard_url}')
+
+    def test_authenticated_user_can_open_dashboard(self):
+        self.client.login(username='dashboard_user', password='testpass123')
+
+        response = self.client.get(reverse('dashboard:dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard/dashboard.html')
