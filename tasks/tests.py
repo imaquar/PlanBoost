@@ -58,6 +58,15 @@ class TasksListViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'tasks/tasks.html')
 
+    def test_anonymous_user_is_redirected_to_login_for_tasks_list(self):
+        tasks_url = reverse('tasks:tasks')
+        login_url = reverse('login')
+
+        response = self.client.get(tasks_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'{login_url}?next={tasks_url}')
+
     def test_tasks_list_shows_only_current_user_tasks(self):
         self.client.login(username='tasks_owner', password='testpass123')
 
