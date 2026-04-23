@@ -68,3 +68,44 @@ class TasksListViewTests(TestCase):
         self.assertNotIn(self.other_task, response.context['task'])
         self.assertContains(response, 'Owner task')
         self.assertNotContains(response, 'Other task')
+
+
+class TaskCreationFormAndViewTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='taskcreator', password='testpass123',)
+
+    def test_task_form_is_valid_with_correct_data(self):
+        from .forms import TaskForm
+        deadline_input = (timezone.now() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M')
+
+        form = TaskForm(data={'label': 'Created task', 'description': 'Created description',
+            'deadline': deadline_input, 'priority': '2',})
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_task_form_is_invalid_without_required_label(self):
+        from .forms import TaskForm
+        deadline_input = (timezone.now() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M')
+
+        form = TaskForm(data={'label': '', 'description': 'Created description',
+            'deadline': deadline_input, 'priority': '2',})
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('label', form.errors)
+
+    def test_create_task_view_saves_task_for_current_user(self):
+        self.client.login(username='taskcreator', password='testpass123')
+        deadline_input = (timezone.now() + timedelta(days=2)).strftime('%Y-%m-%dT%H:%M')
+
+        response = self.client.post(reverse('tasks:create'), data={'label': 'View created task',
+            'description': 'View created description', 'deadline': deadline_input, 'priority': '3',})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/tasks/')
+
+        created_task = Task.objects.get(label='View created task', user=self.user)
+        self.assertEqual(created_task.description, 'View created description')
+        self.assertEqual(created_task.priority, 3)
+        self.assertFalse(created_task.status)
+        self.assertEqual(created_task.user, self.user)
+        self.assertIsNotNone(created_task.deadline)
