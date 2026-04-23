@@ -109,3 +109,40 @@ class TaskCreationFormAndViewTests(TestCase):
         self.assertFalse(created_task.status)
         self.assertEqual(created_task.user, self.user)
         self.assertIsNotNone(created_task.deadline)
+
+
+class TaskEditingTests(TestCase):
+    def setUp(self):
+        self.owner = get_user_model().objects.create_user(username='taskowner', password='testpass123',)
+        self.other_user = get_user_model().objects.create_user(username='taskintruder', password='testpass123',)
+        self.task = Task.objects.create(label='Original task', description='Original description', priority=2,
+            deadline=timezone.now() + timedelta(days=1), user=self.owner,)
+
+    def test_owner_can_edit_own_task(self):
+        self.client.login(username='taskowner', password='testpass123')
+        new_deadline = (timezone.now() + timedelta(days=5)).strftime('%Y-%m-%dT%H:%M')
+
+        response = self.client.post(reverse('tasks:edit', args=[self.task.id]), data={
+            'label': 'Updated task', 'description': 'Updated description', 'deadline': new_deadline, 'priority': '1',})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'/tasks/task/{self.task.id}/')
+
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.label, 'Updated task')
+        self.assertEqual(self.task.description, 'Updated description')
+        self.assertEqual(self.task.priority, 1)
+
+    def test_other_user_cannot_edit_foreign_task(self):
+        self.client.login(username='taskintruder', password='testpass123')
+        new_deadline = (timezone.now() + timedelta(days=7)).strftime('%Y-%m-%dT%H:%M')
+
+        response = self.client.post(reverse('tasks:edit', args=[self.task.id]), data={
+            'label': 'Hacked task', 'description': 'Hacked description', 'deadline': new_deadline, 'priority': '3',})
+
+        self.assertEqual(response.status_code, 404)
+
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.label, 'Original task')
+        self.assertEqual(self.task.description, 'Original description')
+        self.assertEqual(self.task.priority, 2)
