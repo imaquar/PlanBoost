@@ -230,3 +230,82 @@ class ProfilePageContextTests(TestCase):
         self.assertContains(response, self.user.username)
         self.assertContains(response, self.user.profile.avatar.url)
         self.assertNotContains(response, self.other_user.username)
+
+
+class PasswordChangePageAccessTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='pwdaccess01', password='StrongPass123',)
+
+    def test_anonymous_user_is_redirected_to_login_for_password_change_page(self):
+        password_change_url = reverse('users:password_change')
+        login_url = reverse('users:login')
+
+        response = self.client.get(password_change_url)
+        expected_redirect = f'{login_url}?next={quote(password_change_url, safe="/")}'
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
+
+    def test_authenticated_user_can_open_password_change_page(self):
+        self.client.login(username='pwdaccess01', password='StrongPass123')
+
+        response = self.client.get(reverse('users:password_change'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'registration/change_password.html')
+
+
+class PasswordChangeFormTests(TestCase):
+    def setUp(self):
+        self.username = 'pwdform01'
+        self.old_password = 'StrongPass123'
+        self.new_password = 'NewStrongPass123'
+        self.user = User.objects.create_user(username=self.username, password=self.old_password,)
+
+    def test_password_change_with_valid_form_updates_password(self):
+        self.client.login(username=self.username, password=self.old_password)
+
+        response = self.client.post(reverse('users:password_change'), data={'old_password': self.old_password,
+            'new_password1': self.new_password, 'new_password2': self.new_password,})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('users:profile'))
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(self.new_password))
+        self.assertFalse(self.user.check_password(self.old_password))
+
+        self.client.logout()
+        self.assertFalse(self.client.login(username=self.username, password=self.old_password))
+        self.assertTrue(self.client.login(username=self.username, password=self.new_password))
+
+
+class InvalidPasswordChangeTests(TestCase):
+    def setUp(self):
+        self.username = 'pwdinvalid01'
+        self.password = 'StrongPass123'
+        self.user = User.objects.create_user(username=self.username, password=self.password,)
+
+    def test_password_change_fails_with_incorrect_old_password(self):
+        self.client.login(username=self.username, password=self.password)
+
+        response = self.client.post(reverse('users:password_change'), data={'old_password': 'WrongOldPass123',
+            'new_password1': 'AnotherStrongPass123', 'new_password2': 'AnotherStrongPass123',})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'registration/change_password.html')
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(self.password))
+
+    def test_password_change_fails_when_new_passwords_do_not_match(self):
+        self.client.login(username=self.username, password=self.password)
+
+        response = self.client.post(reverse('users:password_change'), data={'old_password': self.password,
+            'new_password1': 'AnotherStrongPass123', 'new_password2': 'DifferentStrongPass123',})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'registration/change_password.html')
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(self.password))
