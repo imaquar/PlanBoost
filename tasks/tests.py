@@ -146,3 +146,28 @@ class TaskEditingTests(TestCase):
         self.assertEqual(self.task.label, 'Original task')
         self.assertEqual(self.task.description, 'Original description')
         self.assertEqual(self.task.priority, 2)
+
+
+class TaskDeletionTests(TestCase):
+    def setUp(self):
+        self.owner = get_user_model().objects.create_user(username='taskdeleteowner', password='testpass123',)
+        self.other_user = get_user_model().objects.create_user(username='taskdeleteintruder', password='testpass123',)
+        self.task = Task.objects.create(label='Delete task', description='Delete description', priority=2,
+            deadline=timezone.now() + timedelta(days=2), user=self.owner,)
+
+    def test_owner_can_delete_own_task(self):
+        self.client.login(username='taskdeleteowner', password='testpass123')
+
+        response = self.client.post(reverse('tasks:delete', args=[self.task.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('tasks:tasks'))
+        self.assertFalse(Task.objects.filter(id=self.task.id).exists())
+
+    def test_other_user_cannot_delete_foreign_task(self):
+        self.client.login(username='taskdeleteintruder', password='testpass123')
+
+        response = self.client.post(reverse('tasks:delete', args=[self.task.id]))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Task.objects.filter(id=self.task.id).exists())
