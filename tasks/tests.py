@@ -205,3 +205,51 @@ class TaskCompletionStatusTests(TestCase):
         self.task.refresh_from_db()
         self.assertFalse(self.task.status)
         self.assertIsNone(self.task.completed_at)
+
+
+class TaskFilteringAndSortingTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='tasksfilterowner', password='testpass123',)
+        self.other_user = get_user_model().objects.create_user(username='tasksfilterother', password='testpass123',)
+
+        now = timezone.now()
+        self.active_low = Task.objects.create(label='Active low', description='A', priority=1,
+            deadline=now + timedelta(days=3), status=False, user=self.user,)
+        self.active_high_early = Task.objects.create(label='Active high early', description='B', priority=3,
+            deadline=now + timedelta(days=1), status=False, user=self.user,)
+        self.active_high_late = Task.objects.create(label='Active high late', description='C', priority=3,
+            deadline=now + timedelta(days=2), status=False, user=self.user,)
+        self.completed_own = Task.objects.create(label='Completed own', description='D', priority=2,
+            deadline=now + timedelta(days=4), status=True, completed_at=now, user=self.user,)
+
+        Task.objects.create(label='Other active', description='X', priority=3,
+            deadline=now + timedelta(days=1), status=False, user=self.other_user,)
+        Task.objects.create(label='Other completed', description='Y', priority=2,
+            deadline=now + timedelta(days=2), status=True, completed_at=now, user=self.other_user,)
+
+    def test_filter_by_status_returns_only_completed_tasks_for_current_user(self):
+        self.client.login(username='tasksfilterowner', password='testpass123')
+
+        response = self.client.get(reverse('tasks:tasks'), data={'show': 'completed'})
+
+        self.assertEqual(response.status_code, 200)
+        tasks = list(response.context['task'])
+        self.assertEqual(tasks, [self.completed_own])
+
+    def test_sort_by_priority_orders_tasks_desc_priority_then_deadline(self):
+        self.client.login(username='tasksfilterowner', password='testpass123')
+
+        response = self.client.get(reverse('tasks:tasks'), data={'sort': 'priority'})
+
+        self.assertEqual(response.status_code, 200)
+        tasks = list(response.context['task'])
+        self.assertEqual(tasks, [self.active_high_early, self.active_high_late, self.active_low])
+
+    def test_sort_by_deadline_orders_tasks_ascending_deadline(self):
+        self.client.login(username='tasksfilterowner', password='testpass123')
+
+        response = self.client.get(reverse('tasks:tasks'), data={'sort': 'deadline'})
+
+        self.assertEqual(response.status_code, 200)
+        tasks = list(response.context['task'])
+        self.assertEqual(tasks, [self.active_high_early, self.active_high_late, self.active_low])
