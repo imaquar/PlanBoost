@@ -171,3 +171,37 @@ class TaskDeletionTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Task.objects.filter(id=self.task.id).exists())
+
+
+class TaskCompletionStatusTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='taskstatusowner', password='testpass123',)
+        self.task = Task.objects.create(label='Status task', description='Status description', priority=2,
+            deadline=timezone.now() + timedelta(days=1), user=self.user,)
+
+    def test_toggle_status_marks_task_completed_and_sets_completed_at(self):
+        self.client.login(username='taskstatusowner', password='testpass123')
+
+        response = self.client.post(reverse('tasks:toggle_status', args=[self.task.id]), data={'status': 'on'})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('tasks:tasks'))
+
+        self.task.refresh_from_db()
+        self.assertTrue(self.task.status)
+        self.assertIsNotNone(self.task.completed_at)
+
+    def test_toggle_status_unchecks_task_and_clears_completed_at(self):
+        self.client.login(username='taskstatusowner', password='testpass123')
+        self.task.status = True
+        self.task.completed_at = timezone.now()
+        self.task.save(update_fields=['status', 'completed_at'])
+
+        response = self.client.post(reverse('tasks:toggle_status', args=[self.task.id]), data={})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('tasks:tasks'))
+
+        self.task.refresh_from_db()
+        self.assertFalse(self.task.status)
+        self.assertIsNone(self.task.completed_at)
