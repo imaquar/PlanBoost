@@ -1,5 +1,5 @@
 (function () {
-    const mobileQuery = window.matchMedia('(max-width: 640px)');
+    const mobileQuery = window.matchMedia('(max-width: 780px), (hover: none) and (pointer: coarse)');
     const menuSyncEvent = 'planboost:mobile-menu-open';
 
     function initHeaderMenu() {

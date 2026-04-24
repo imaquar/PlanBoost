@@ -480,7 +480,7 @@ html[data-theme="dark"] .header-logo-button:active .header-logo-white {
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 780px), (hover: none) and (pointer: coarse) {
     .header-menu-trigger {
         cursor: pointer;
     }
@@ -494,7 +494,9 @@ html[data-theme="dark"] .header-logo-button:active .header-logo-white {
     .header-menu-container.is-open .header-dropdown {
         display: flex;
     }
+}
 
+@media (max-width: 640px) {
     .page-main {
         padding-top: 92px;
     }

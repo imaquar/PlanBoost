@@ -381,7 +381,7 @@
     margin: 0;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 780px), (hover: none) and (pointer: coarse) {
     .tasks-sort-trigger {
         cursor: pointer;
     }
@@ -395,7 +395,9 @@
     .tasks-sort-menu.is-open .tasks-sort-dropdown {
         display: flex;
     }
+}
 
+@media (max-width: 640px) {
     .tasks-page .page-title {
         margin-top: 4.2rem;
     }
