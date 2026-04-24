@@ -1,5 +1,6 @@
 (function () {
     const mobileQuery = window.matchMedia('(max-width: 640px)');
+    const menuSyncEvent = 'planboost:mobile-menu-open';
 
     function initSortMenu() {
         const sortMenu = document.querySelector('.tasks-sort-menu');
@@ -13,9 +14,15 @@
             return mobileQuery.matches;
         }
 
-        function setOpen(isOpen) {
-            sortMenu.classList.toggle('is-open', isOpen);
-            sortTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        function closeMenu() {
+            sortMenu.classList.remove('is-open');
+            sortTrigger.setAttribute('aria-expanded', 'false');
+        }
+
+        function openMenu() {
+            sortMenu.classList.add('is-open');
+            sortTrigger.setAttribute('aria-expanded', 'true');
+            document.dispatchEvent(new CustomEvent(menuSyncEvent, { detail: { source: 'sort' } }));
         }
 
         function toggleMenu(event) {
@@ -24,14 +31,46 @@
             }
 
             event.preventDefault();
-            setOpen(!sortMenu.classList.contains('is-open'));
-        }
 
-        function closeMenu() {
-            setOpen(false);
+            if (sortMenu.classList.contains('is-open')) {
+                closeMenu();
+                return;
+            }
+
+            openMenu();
         }
 
         sortTrigger.addEventListener('click', toggleMenu);
+
+        document.addEventListener('pointerdown', function (event) {
+            if (!isMobile()) {
+                return;
+            }
+
+            if (!sortMenu.classList.contains('is-open')) {
+                return;
+            }
+
+            if (!sortMenu.contains(event.target)) {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener(menuSyncEvent, function (event) {
+            if (!isMobile()) {
+                return;
+            }
+
+            if (event.detail && event.detail.source !== 'sort') {
+                closeMenu();
+            }
+        });
 
         if (typeof mobileQuery.addEventListener === 'function') {
             mobileQuery.addEventListener('change', closeMenu);

@@ -1,5 +1,6 @@
 (function () {
     const mobileQuery = window.matchMedia('(max-width: 640px)');
+    const menuSyncEvent = 'planboost:mobile-menu-open';
 
     function initHeaderMenu() {
         const menuContainer = document.querySelector('.header-menu-container');
@@ -21,6 +22,7 @@
         function openMenu() {
             menuContainer.classList.add('is-open');
             menuTrigger.setAttribute('aria-expanded', 'true');
+            document.dispatchEvent(new CustomEvent(menuSyncEvent, { detail: { source: 'header' } }));
         }
 
         function toggleMenu(event) {
@@ -56,6 +58,16 @@
 
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener(menuSyncEvent, function (event) {
+            if (!isMobile()) {
+                return;
+            }
+
+            if (event.detail && event.detail.source !== 'header') {
                 closeMenu();
             }
         });
