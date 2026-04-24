@@ -29,7 +29,6 @@
             }
 
             event.preventDefault();
-            event.stopPropagation();
 
             if (menuContainer.classList.contains('is-open')) {
                 closeMenu();
@@ -41,8 +40,12 @@
 
         menuTrigger.addEventListener('click', toggleMenu);
 
-        document.addEventListener('click', function (event) {
+        document.addEventListener('pointerdown', function (event) {
             if (!isMobile()) {
+                return;
+            }
+
+            if (!menuContainer.classList.contains('is-open')) {
                 return;
             }
 
