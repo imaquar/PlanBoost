@@ -382,6 +382,20 @@
 }
 
 @media (max-width: 640px) {
+    .tasks-sort-trigger {
+        cursor: pointer;
+    }
+
+    .tasks-sort-menu:hover .tasks-sort-dropdown,
+    .tasks-sort-menu:focus-within .tasks-sort-dropdown,
+    .tasks-sort-dropdown:hover {
+        display: none;
+    }
+
+    .tasks-sort-menu.is-open .tasks-sort-dropdown {
+        display: flex;
+    }
+
     .tasks-page .page-title {
         margin-top: 4.2rem;
     }

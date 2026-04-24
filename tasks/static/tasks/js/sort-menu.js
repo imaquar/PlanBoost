@@ -2,11 +2,11 @@
     const mobileQuery = window.matchMedia('(max-width: 640px)');
     const menuSyncEvent = 'planboost:mobile-menu-open';
 
-    function initHeaderMenu() {
-        const menuContainer = document.querySelector('.header-menu-container');
-        const menuTrigger = document.querySelector('.header-menu-trigger');
+    function initSortMenu() {
+        const sortMenu = document.querySelector('.tasks-sort-menu');
+        const sortTrigger = document.querySelector('.tasks-sort-trigger');
 
-        if (!menuContainer || !menuTrigger) {
+        if (!sortMenu || !sortTrigger) {
             return;
         }
 
@@ -15,14 +15,14 @@
         }
 
         function closeMenu() {
-            menuContainer.classList.remove('is-open');
-            menuTrigger.setAttribute('aria-expanded', 'false');
+            sortMenu.classList.remove('is-open');
+            sortTrigger.setAttribute('aria-expanded', 'false');
         }
 
         function openMenu() {
-            menuContainer.classList.add('is-open');
-            menuTrigger.setAttribute('aria-expanded', 'true');
-            document.dispatchEvent(new CustomEvent(menuSyncEvent, { detail: { source: 'header' } }));
+            sortMenu.classList.add('is-open');
+            sortTrigger.setAttribute('aria-expanded', 'true');
+            document.dispatchEvent(new CustomEvent(menuSyncEvent, { detail: { source: 'sort' } }));
         }
 
         function toggleMenu(event) {
@@ -32,7 +32,7 @@
 
             event.preventDefault();
 
-            if (menuContainer.classList.contains('is-open')) {
+            if (sortMenu.classList.contains('is-open')) {
                 closeMenu();
                 return;
             }
@@ -40,18 +40,18 @@
             openMenu();
         }
 
-        menuTrigger.addEventListener('click', toggleMenu);
+        sortTrigger.addEventListener('click', toggleMenu);
 
         document.addEventListener('pointerdown', function (event) {
             if (!isMobile()) {
                 return;
             }
 
-            if (!menuContainer.classList.contains('is-open')) {
+            if (!sortMenu.classList.contains('is-open')) {
                 return;
             }
 
-            if (!menuContainer.contains(event.target)) {
+            if (!sortMenu.contains(event.target)) {
                 closeMenu();
             }
         });
@@ -67,7 +67,7 @@
                 return;
             }
 
-            if (event.detail && event.detail.source !== 'header') {
+            if (event.detail && event.detail.source !== 'sort') {
                 closeMenu();
             }
         });
@@ -81,5 +81,5 @@
         closeMenu();
     }
 
-    document.addEventListener('DOMContentLoaded', initHeaderMenu);
+    document.addEventListener('DOMContentLoaded', initSortMenu);
 })();

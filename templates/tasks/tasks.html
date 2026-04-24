@@ -3,7 +3,7 @@
 {% block title %}Tasks{% endblock title %}
 {% block body_class %}tasks-page{% endblock body_class %}
 {% block title_h1 %}Tasks{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=7">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=8">{% endblock css %}
 {% block content %}
     <div class="tasks-list-layout">
         <div class="tasks-status-switch">
@@ -38,8 +38,8 @@
                 <button type="submit">create task</button>
             </form>
             <div class="tasks-sort-menu">
-                <button class="tasks-sort-trigger" type="button">sort</button>
-                <ul class="tasks-sort-dropdown">
+                <button class="tasks-sort-trigger" type="button" aria-expanded="false" aria-controls="tasks-sort-dropdown">sort</button>
+                <ul class="tasks-sort-dropdown" id="tasks-sort-dropdown">
                     <li>
                         <a class="tasks-sort-link {% if sort == 'deadline' %}is-active{% endif %}" href="{% if show_completed %}?show=completed&sort=deadline{% else %}?sort=deadline{% endif %}">deadline</a>
                     </li>
@@ -50,4 +50,5 @@
             </div>
         </div>
     </div>
+<script src="{% static 'tasks/js/sort-menu.js' %}?v=2"></script>
 {% endblock content %}
