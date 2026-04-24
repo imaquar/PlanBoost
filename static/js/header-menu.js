@@ -11,8 +11,10 @@
             return;
         }
 
-        function isMobile() {
-            return widthQuery.matches || touchQuery.matches || navigator.maxTouchPoints > 0;
+        let lastTouchToggleAt = 0;
+
+        function isMobileLike() {
+            return widthQuery.matches || touchQuery.matches || navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
         }
 
         function closeMenu() {
@@ -27,7 +29,7 @@
         }
 
         function toggleMenu(event) {
-            if (!isMobile()) {
+            if (!isMobileLike()) {
                 return;
             }
 
@@ -41,10 +43,21 @@
             openMenu();
         }
 
-        menuTrigger.addEventListener('click', toggleMenu);
+        menuTrigger.addEventListener('touchend', function (event) {
+            lastTouchToggleAt = Date.now();
+            toggleMenu(event);
+        }, { passive: false });
+
+        menuTrigger.addEventListener('click', function (event) {
+            if (Date.now() - lastTouchToggleAt < 400) {
+                event.preventDefault();
+                return;
+            }
+            toggleMenu(event);
+        });
 
         document.addEventListener('pointerdown', function (event) {
-            if (!isMobile()) {
+            if (!isMobileLike()) {
                 return;
             }
 
@@ -64,7 +77,7 @@
         });
 
         document.addEventListener(menuSyncEvent, function (event) {
-            if (!isMobile()) {
+            if (!isMobileLike()) {
                 return;
             }
 
