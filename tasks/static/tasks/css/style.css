@@ -381,7 +381,23 @@
     margin: 0;
 }
 
-@media (max-width: 780px), (hover: none) and (pointer: coarse) {
+@media (max-width: 780px) {
+    .tasks-sort-trigger {
+        cursor: pointer;
+    }
+
+    .tasks-sort-menu:hover .tasks-sort-dropdown,
+    .tasks-sort-menu:focus-within .tasks-sort-dropdown,
+    .tasks-sort-dropdown:hover {
+        display: none;
+    }
+
+    .tasks-sort-menu.is-open .tasks-sort-dropdown {
+        display: flex;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
     .tasks-sort-trigger {
         cursor: pointer;
     }

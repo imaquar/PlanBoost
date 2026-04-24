@@ -1,5 +1,6 @@
 (function () {
-    const mobileQuery = window.matchMedia('(max-width: 780px), (hover: none) and (pointer: coarse)');
+    const widthQuery = window.matchMedia('(max-width: 780px)');
+    const touchQuery = window.matchMedia('(hover: none) and (pointer: coarse)');
     const menuSyncEvent = 'planboost:mobile-menu-open';
 
     function initHeaderMenu() {
@@ -11,7 +12,7 @@
         }
 
         function isMobile() {
-            return mobileQuery.matches;
+            return widthQuery.matches || touchQuery.matches || navigator.maxTouchPoints > 0;
         }
 
         function closeMenu() {
@@ -72,11 +73,16 @@
             }
         });
 
-        if (typeof mobileQuery.addEventListener === 'function') {
-            mobileQuery.addEventListener('change', closeMenu);
-        } else if (typeof mobileQuery.addListener === 'function') {
-            mobileQuery.addListener(closeMenu);
+        function bindQuery(query, handler) {
+            if (typeof query.addEventListener === 'function') {
+                query.addEventListener('change', handler);
+            } else if (typeof query.addListener === 'function') {
+                query.addListener(handler);
+            }
         }
+
+        bindQuery(widthQuery, closeMenu);
+        bindQuery(touchQuery, closeMenu);
 
         closeMenu();
     }
