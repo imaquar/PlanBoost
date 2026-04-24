@@ -481,6 +481,20 @@ html[data-theme="dark"] .header-logo-button:active .header-logo-white {
 }
 
 @media (max-width: 640px) {
+    .header-menu-trigger {
+        cursor: pointer;
+    }
+
+    .header-menu-container:hover .header-dropdown,
+    .header-menu-container:focus-within .header-dropdown,
+    .header-dropdown:hover {
+        display: none;
+    }
+
+    .header-menu-container.is-open .header-dropdown {
+        display: flex;
+    }
+
     .page-main {
         padding-top: 92px;
     }

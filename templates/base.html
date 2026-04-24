@@ -49,8 +49,8 @@
                         </a>
 
                         <div class="header-menu-container">
-                            <span class="header-menu-trigger">PlanBoost</span>
-                            <ul class="header-dropdown">
+                            <button class="header-menu-trigger" type="button" aria-expanded="false" aria-controls="header-menu-dropdown">PlanBoost</button>
+                            <ul class="header-dropdown" id="header-menu-dropdown">
                                 <li><a class="header-dropdown-link" href="/tasks/">Tasks</a></li>
                                 <li><a class="header-dropdown-link" href="/notes/">Notes</a></li>
                                 <li><a class="header-dropdown-link" href="/timer/">Timer</a></li>
@@ -83,6 +83,7 @@
             PlanBoost © 2026
         </div>
     </footer>
+    <script src="{% static 'js/header-menu.js' %}?v=1"></script>
     <script src="{% static 'js/theme.js' %}?v=2"></script>
 </body>
 </html>
