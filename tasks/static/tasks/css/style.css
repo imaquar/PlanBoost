@@ -315,6 +315,7 @@
     display: grid;
     gap: 0.45rem;
     min-width: 0;
+    width: 100%;
 }
 
 .tasks-form-field label {
@@ -356,6 +357,21 @@
 .tasks-form-shell input[type="datetime-local"] {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
+}
+
+.tasks-form-shell input[type="date"],
+.tasks-form-shell input[type="time"],
+.tasks-form-shell input[type="datetime-local"] {
+    inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.tasks-form-shell input[type="datetime-local"]::-webkit-datetime-edit,
+.tasks-form-shell input[type="datetime-local"]::-webkit-date-and-time-value {
     min-width: 0;
 }
 
