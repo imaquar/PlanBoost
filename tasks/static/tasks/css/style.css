@@ -306,6 +306,7 @@
     margin: 0;
     display: grid;
     gap: 0.45rem;
+    min-width: 0;
 }
 
 .tasks-form-field label {
@@ -344,6 +345,12 @@
     min-height: 2.8rem;
 }
 
+.tasks-form-shell input[type="datetime-local"] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
 .tasks-form-shell textarea {
     min-height: 8.5rem;
     resize: none;
@@ -378,6 +385,8 @@
 .tasks-form-actions > button,
 .tasks-form-action-form button {
     min-width: 9.5rem;
+    width: 9.5rem;
+    height: 44px;
     margin: 0;
 }
 
