@@ -313,6 +313,7 @@ input[type="checkbox"]:checked::before {
     height: 44px;
     border-radius: 999px;
     text-decoration: none;
+    touch-action: manipulation;
 }
 
 .header-icon-button:hover,
@@ -342,6 +343,9 @@ input[type="checkbox"]:checked::before {
 
 .header-logo-dark,
 .header-logo-white {
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
     position: absolute;
     width: 34px;
     height: 34px;
