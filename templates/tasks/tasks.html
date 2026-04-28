@@ -5,7 +5,7 @@
 {% block title_h1 %}Tasks{% endblock title_h1 %}
 {% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=14">{% endblock css %}
 {% block content %}
-    <div class="tasks-list-layout">
+    <div class="tasks-list-layout" data-show-completed="{{ show_completed|yesno:'1,0' }}">
         <div class="tasks-status-switch">
             <a class="tasks-switch-link {% if not show_completed %}is-active{% endif %}" href="{% if sort %}{% url 'tasks:tasks' %}?sort={{ sort }}{% else %}{% url 'tasks:tasks' %}{% endif %}">active</a>
             <a class="tasks-switch-link {% if show_completed %}is-active{% endif %}" href="{% if sort %}{% url 'tasks:tasks' %}?show=completed&sort={{ sort }}{% else %}{% url 'tasks:tasks' %}?show=completed{% endif %}">completed</a>
@@ -14,10 +14,10 @@
             <ul class="tasks-list">
                 {% for i in task %}
                     <li class="tasks-list-item">
-                        <form class="tasks-toggle-form" method="post" action="{% url 'tasks:toggle_status' i.id %}">
+                        <form class="tasks-toggle-form" method="post" action="{% url 'tasks:toggle_status' i.id %}" data-ajax-url="{% url 'tasks:toggle_status_ajax' i.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <input type="checkbox" name="status" {% if i.status %}checked{% endif %} onchange="this.form.submit()">
+                            <input type="checkbox" name="status" {% if i.status %}checked{% endif %}>
                         </form>
                         <a class="tasks-item-link" href="{% url 'tasks:task' i.id %}?next={{ request.get_full_path|urlencode }}">{{ i.label }}</a>
                         <span class="tasks-item-time">
@@ -51,4 +51,5 @@
         </div>
     </div>
 <script src="{% static 'tasks/js/sort-menu.js' %}?v=5"></script>
+<script src="{% static 'tasks/js/task-toggle-ajax.js' %}?v=1"></script>
 {% endblock content %}
