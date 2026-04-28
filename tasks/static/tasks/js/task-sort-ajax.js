@@ -234,8 +234,6 @@
             const isSortAction = Boolean(sortLink);
             const sourceLink = sortLink || filterLink;
 
-            ajax.renderLoading(listLayout, 'loading tasks...');
-
             try {
                 const targetUrl = new URL(sourceLink.href, window.location.origin);
                 const sort = targetUrl.searchParams.get('sort') || (listLayout.dataset.currentSort || 'deadline');
@@ -253,7 +251,6 @@
                         taskDetailTemplate: taskDetailTemplate,
                     }
                 );
-                ajax.clearStatus(listLayout);
             } catch (error) {
                 ajax.renderError(listLayout, 'network error, reloading...');
                 window.location.assign(sourceLink.href);
