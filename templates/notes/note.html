@@ -3,7 +3,7 @@
 {% block title %}Notes{% endblock title %}
 {% block body_class %}notes-page notes-detail-page{% endblock body_class %}
 {% block title_h1 %}{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'notes/css/style.css' %}?v=9">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'notes/css/style.css' %}?v=10">{% endblock css %}
 {% block content %}
     <div class="notes-detail-layout">
         <div class="notes-detail-meta">
@@ -13,10 +13,12 @@
         <div class="notes-detail-card notes-detail-text">{{ note.text }}</div>
         <div class="notes-detail-actions">
             <form class="notes-detail-action-form" method="get" action="{% url 'notes:edit' note.id %}">
+                <input type="hidden" name="next" value="{{ next|default:'/notes/' }}">
                 <button type="submit">edit</button>
             </form>
             <form class="notes-detail-action-form" method="post" action="{% url 'notes:delete' note.id %}">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next|default:'/notes/' }}">
                 <button type="submit">delete</button>
             </form>
         </div>
