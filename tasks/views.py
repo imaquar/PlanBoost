@@ -88,6 +88,25 @@ def toggle_status(request, id):
     task.save(update_fields=['status', 'completed_at'])
     return redirect(request.POST.get('next') or 'tasks:tasks')
 
+
+@login_required
+@require_POST
+def toggle_status_ajax(request, id):
+    task = get_object_or_404(Task, id=id, user=request.user)
+    raw_status = request.POST.get('status')
+    is_done = str(raw_status).lower() in ('1', 'true', 'on', 'yes')
+
+    task.status = is_done
+    task.completed_at = timezone.now() if is_done else None
+    task.save(update_fields=['status', 'completed_at'])
+
+    return JsonResponse({
+        'ok': True,
+        'id': task.id,
+        'status': task.status,
+        'completed_at': task.completed_at.isoformat() if task.completed_at else None,
+    })
+
 @login_required
 @require_GET
 def stats(request):
