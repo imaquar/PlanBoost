@@ -177,13 +177,16 @@
 
         let busy = false;
 
-        async function refresh() {
+        async function refresh(options) {
+            const opts = options || {};
             if (busy) {
                 return;
             }
 
             busy = true;
-            ajax.renderLoading(root, 'refreshing dashboard...');
+            if (!opts.silent) {
+                ajax.renderLoading(root, 'refreshing dashboard...');
+            }
 
             try {
                 const data = await ajax.requestJson(apiUrl, { method: 'GET', csrf: false });
@@ -220,14 +223,13 @@
 
             const previousChecked = !checkbox.checked;
             checkbox.disabled = true;
-            ajax.renderLoading(root, 'updating task...');
 
             try {
                 await ajax.requestJson(form.dataset.ajaxUrl, {
                     method: 'POST',
                     data: { status: checkbox.checked ? 'true' : 'false' },
                 });
-                await refresh();
+                await refresh({ silent: true });
             } catch (error) {
                 checkbox.checked = previousChecked;
                 ajax.renderError(root, 'failed to update task');

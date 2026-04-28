@@ -65,7 +65,6 @@
             const prevStatus = !nextStatus;
 
             form.dataset.busy = '1';
-            ajax.renderLoading(listLayout, 'updating task...');
 
             try {
                 const data = await ajax.requestJson(ajaxUrl, {
@@ -73,7 +72,6 @@
                     data: { status: String(nextStatus) },
                 });
 
-                ajax.clearStatus(listLayout);
                 checkbox.checked = Boolean(data.status);
 
                 const showCompleted = listLayout.dataset.showCompleted === '1';
