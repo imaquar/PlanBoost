@@ -107,6 +107,51 @@ def toggle_status_ajax(request, id):
         'completed_at': task.completed_at.isoformat() if task.completed_at else None,
     })
 
+
+@login_required
+@require_GET
+def tasks_list_ajax(request):
+    sort = request.GET.get('sort', 'deadline')
+    show_completed = request.GET.get('show') == 'completed'
+
+    qs = Task.objects.filter(user=request.user, status=show_completed)
+    if sort == 'priority':
+        qs = qs.order_by('-priority', 'deadline')
+    else:
+        sort = 'deadline'
+        qs = qs.order_by('deadline')
+
+    tasks = []
+    for task in qs:
+        deadline_display = ''
+        if task.deadline:
+            deadline_value = timezone.localtime(task.deadline) if timezone.is_aware(task.deadline) else task.deadline
+            deadline_display = deadline_value.strftime('%d.%m.%y %H:%M')
+
+        completed_display = ''
+        if task.completed_at:
+            completed_value = timezone.localtime(task.completed_at) if timezone.is_aware(task.completed_at) else task.completed_at
+            completed_display = completed_value.strftime('%d.%m.%y %H:%M')
+
+        tasks.append({
+            'id': task.id,
+            'label': task.label,
+            'status': task.status,
+            'priority': task.priority,
+            'priority_display': task.get_priority_display(),
+            'deadline': task.deadline.isoformat() if task.deadline else None,
+            'deadline_display': deadline_display,
+            'completed_at': task.completed_at.isoformat() if task.completed_at else None,
+            'completed_at_display': completed_display,
+        })
+
+    return JsonResponse({
+        'ok': True,
+        'sort': sort,
+        'show_completed': show_completed,
+        'tasks': tasks,
+    })
+
 @login_required
 @require_GET
 def stats(request):

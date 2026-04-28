@@ -11,5 +11,6 @@ urlpatterns = [
     path('delete/<int:id>/', views.delete, name='delete'),
     path('toggle-status/<int:id>/', views.toggle_status, name='toggle_status'),
     path('toggle-status-ajax/<int:id>/', views.toggle_status_ajax, name='toggle_status_ajax'),
+    path('api/list/', views.tasks_list_ajax, name='tasks_list_ajax'),
     path('api/stats/', views.stats, name='stats'),
 ]
