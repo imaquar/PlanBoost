@@ -1,10 +1,4 @@
 (function () {
-    function getCookie(name) {
-        const escapedName = name.replace(/[-.]/g, '\\$&');
-        const match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
-        return match ? decodeURIComponent(match[1]) : '';
-    }
-
     function replaceIdInPath(template, id) {
         return template.replace('/0/', '/' + id + '/');
     }
@@ -175,26 +169,14 @@
     }
 
     async function fetchAndRender(listLayout, endpointUrl, sort, showCompleted, options) {
+        const ajax = window.AjaxUtils;
         const fetchUrl = new URL(endpointUrl, window.location.origin);
         fetchUrl.searchParams.set('sort', sort || 'deadline');
         if (showCompleted) {
             fetchUrl.searchParams.set('show', 'completed');
         }
 
-        const response = await fetch(fetchUrl.toString(), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin',
-        });
-
-        if (!response.ok) {
-            throw new Error('Request failed');
-        }
-
-        const data = await response.json();
+        const data = await ajax.requestJson(fetchUrl.toString(), { method: 'GET', csrf: false });
 
         listLayout.dataset.showCompleted = data.show_completed ? '1' : '0';
         listLayout.dataset.currentSort = data.sort || sort || 'deadline';
@@ -223,7 +205,8 @@
 
     function initTaskSortFilterAjax() {
         const listLayout = document.querySelector('.tasks-list-layout');
-        if (!listLayout) {
+        const ajax = window.AjaxUtils;
+        if (!listLayout || !ajax) {
             return;
         }
 
@@ -232,7 +215,7 @@
         const toggleTemplate = listLayout.dataset.toggleTemplate;
         const toggleAjaxTemplate = listLayout.dataset.toggleAjaxTemplate;
         const taskDetailTemplate = listLayout.dataset.taskDetailTemplate;
-        const csrfToken = getCookie('csrftoken');
+        const csrfToken = ajax.getCsrfToken();
 
         if (!listApiUrl || !filterApiUrl || !toggleTemplate || !toggleAjaxTemplate || !taskDetailTemplate) {
             return;
@@ -251,6 +234,8 @@
             const isSortAction = Boolean(sortLink);
             const sourceLink = sortLink || filterLink;
 
+            ajax.renderLoading(listLayout, 'loading tasks...');
+
             try {
                 const targetUrl = new URL(sourceLink.href, window.location.origin);
                 const sort = targetUrl.searchParams.get('sort') || (listLayout.dataset.currentSort || 'deadline');
@@ -268,7 +253,9 @@
                         taskDetailTemplate: taskDetailTemplate,
                     }
                 );
+                ajax.clearStatus(listLayout);
             } catch (error) {
+                ajax.renderError(listLayout, 'network error, reloading...');
                 window.location.assign(sourceLink.href);
             }
         });

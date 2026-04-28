@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/a533a36acf.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/ajax-utils.js' %}?v=1"></script>
     <script>
         (function () {
             const storageKey = 'planboost-theme';
@@ -28,7 +29,7 @@
     </script>
     <link rel="icon" href="../static/images/planBoostLogoWhiteFullSize.png" type="image/png">
     <title>{% block title %}PlanBoost{% endblock title %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=7">
     {% block css %}{% endblock css %}
 </head>
 <body class="page {% block body_class %}{% endblock body_class %}">

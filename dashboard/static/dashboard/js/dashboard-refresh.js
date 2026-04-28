@@ -1,10 +1,4 @@
 (function () {
-    function getCookie(name) {
-        const escapedName = name.replace(/[-.]/g, '\\$&');
-        const match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
-        return match ? decodeURIComponent(match[1]) : '';
-    }
-
     function replaceIdInPath(template, id) {
         return template.replace('/0/', '/' + id + '/');
     }
@@ -84,7 +78,8 @@
         const list = ensureList(sectionElement, 'dashboard-tasks-list');
         list.replaceChildren();
 
-        const csrfToken = getCookie('csrftoken');
+        const ajax = window.AjaxUtils;
+        const csrfToken = ajax ? ajax.getCsrfToken() : '';
 
         tasks.forEach(function (task) {
             const item = document.createElement('li');
@@ -155,26 +150,10 @@
         });
     }
 
-    async function fetchDashboardData(apiUrl) {
-        const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin',
-        });
-
-        if (!response.ok) {
-            throw new Error('Dashboard refresh failed');
-        }
-
-        return response.json();
-    }
-
     function initDashboardRefresh() {
         const root = document.querySelector('.dashboard-layout');
-        if (!root) {
+        const ajax = window.AjaxUtils;
+        if (!root || !ajax) {
             return;
         }
 
@@ -203,9 +182,10 @@
             }
 
             busy = true;
+            ajax.renderLoading(root, 'refreshing dashboard...');
 
             try {
-                const data = await fetchDashboardData(apiUrl);
+                const data = await ajax.requestJson(apiUrl, { method: 'GET', csrf: false });
                 renderStats(statsSection, data);
                 renderUpcomingTasks(tasksSection, data.upcoming_tasks, {
                     taskToggleTemplate: taskToggleTemplate,
@@ -214,7 +194,9 @@
                 renderRecentNotes(notesSection, data.recent_notes, {
                     noteDetailTemplate: noteDetailTemplate,
                 });
+                ajax.clearStatus(root);
             } catch (error) {
+                ajax.renderError(root, 'failed to refresh dashboard');
             } finally {
                 busy = false;
             }

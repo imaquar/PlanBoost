@@ -1,10 +1,4 @@
 (function () {
-    function getCookie(name) {
-        const escapedName = name.replace(/[-.]/g, '\\$&');
-        const match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
-        return match ? decodeURIComponent(match[1]) : '';
-    }
-
     function formatDateTime(isoValue) {
         if (!isoValue) {
             return '';
@@ -43,11 +37,10 @@
 
     function initTaskToggleAjax() {
         const listLayout = document.querySelector('.tasks-list-layout');
-        if (!listLayout) {
+        const ajax = window.AjaxUtils;
+        if (!listLayout || !ajax) {
             return;
         }
-
-        const csrfToken = getCookie('csrftoken');
 
         listLayout.addEventListener('change', async function (event) {
             const checkbox = event.target.closest('.tasks-toggle-form input[type="checkbox"][name="status"]');
@@ -72,27 +65,15 @@
             const prevStatus = !nextStatus;
 
             form.dataset.busy = '1';
+            ajax.renderLoading(listLayout, 'updating task...');
 
             try {
-                const body = new URLSearchParams();
-                body.set('status', String(nextStatus));
-
-                const response = await fetch(ajaxUrl, {
+                const data = await ajax.requestJson(ajaxUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                        'X-CSRFToken': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: body.toString(),
-                    credentials: 'same-origin',
+                    data: { status: String(nextStatus) },
                 });
 
-                if (!response.ok) {
-                    throw new Error('Toggle failed');
-                }
-
-                const data = await response.json();
+                ajax.clearStatus(listLayout);
                 checkbox.checked = Boolean(data.status);
 
                 const showCompleted = listLayout.dataset.showCompleted === '1';
@@ -112,6 +93,7 @@
                 }
             } catch (error) {
                 checkbox.checked = prevStatus;
+                ajax.renderError(listLayout, 'failed to update task');
             } finally {
                 delete form.dataset.busy;
             }
