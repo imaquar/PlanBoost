@@ -27,6 +27,12 @@
                     data: { status: String(checkbox.checked) },
                 });
                 checkbox.checked = Boolean(data.status);
+                const nextInput = form.querySelector('input[name="next"]');
+                const nextUrl = nextInput ? String(nextInput.value || '').trim() : '';
+                if (nextUrl) {
+                    window.location.assign(nextUrl);
+                    return;
+                }
             } catch (error) {
                 checkbox.checked = previousChecked;
                 ajax.renderError(document.body, 'failed to update task');

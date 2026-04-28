@@ -9,7 +9,7 @@
         <div class="tasks-detail-top-row">
             <form class="tasks-detail-card tasks-detail-completed tasks-detail-toggle-form" method="post" action="{% url 'tasks:toggle_status_ajax' task.id %}" data-ajax-url="{% url 'tasks:toggle_status_ajax' task.id %}">
                 {% csrf_token %}
-                <input type="hidden" name="next" value="{% url 'tasks:tasks' %}">
+                <input type="hidden" name="next" value="{{ next|default:'' }}">
                 <label>
                     <input type="checkbox" name="status" {% if task.status %}checked{% endif %}>
                     completed
@@ -38,5 +38,5 @@
             </form>
         </div>
     </div>
-<script src="{% static 'tasks/js/task-detail-toggle-ajax.js' %}?v=1"></script>
+<script src="{% static 'tasks/js/task-detail-toggle-ajax.js' %}?v=2"></script>
 {% endblock content %}
