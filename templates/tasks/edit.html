@@ -3,11 +3,12 @@
 {% block title %}Tasks{% endblock title %}
 {% block body_class %}tasks-page tasks-form-page tasks-edit-page{% endblock body_class %}
 {% block title_h1 %}{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=14">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=17">{% endblock css %}
 {% block content %}
     <div class="tasks-form-layout">
         <form method="post" id="task-edit-form" class="tasks-form-shell">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next|default:'/tasks/' }}">
             <div class="tasks-form-field">{{ form.label }}</div>
             <div class="tasks-form-row">
                 <div class="tasks-form-field">{{ form.deadline }}</div>
@@ -18,6 +19,7 @@
         <div class="tasks-form-actions">
             <button type="submit" form="task-edit-form">update</button>
             <form method="get" action="{% url 'tasks:task' task.id %}" class="tasks-form-action-form">
+                <input type="hidden" name="next" value="{{ next|default:'/tasks/' }}">
                 <button type="submit">cancel</button>
             </form>
         </div>

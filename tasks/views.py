@@ -7,8 +7,26 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
+from django.urls import reverse
 from .services import get_task_completion_stats
+
+
+def _normalize_tasks_next(next_url):
+    text = str(next_url or '').strip()
+    if not text:
+        return '/tasks/'
+
+    parsed = urlparse(text)
+    path = parsed.path or ''
+    normalized_path = path if path.endswith('/') else path + '/'
+
+    if normalized_path != '/tasks/':
+        return '/tasks/'
+
+    if parsed.query:
+        return '/tasks/?' + parsed.query
+    return '/tasks/'
 
 @login_required
 def index(request):
@@ -28,18 +46,11 @@ def task(request, id):
     except Task.DoesNotExist:
         return HttpResponseNotFound('<h2>Task not found</h2>')
 
-    next_url = request.GET.get('next', '').strip()
-    if not next_url:
+    next_url = _normalize_tasks_next(request.GET.get('next', '').strip())
+    if next_url == '/tasks/':
         referer = request.META.get('HTTP_REFERER', '').strip()
         if referer:
-            parsed = urlparse(referer)
-            if parsed.path.startswith('/tasks/'):
-                next_url = parsed.path
-                if parsed.query:
-                    next_url += '?' + parsed.query
-
-    if not next_url.startswith('/tasks/'):
-        next_url = '/tasks/'
+            next_url = _normalize_tasks_next(referer)
 
     return render(request, 'tasks/task.html', {'task' : task, 'next': next_url})
 
@@ -69,6 +80,8 @@ def edit(request, id):
     except Task.DoesNotExist:
         return HttpResponseNotFound('<h2>Task not found</h2>')
 
+    next_url = _normalize_tasks_next(request.GET.get('next', '') or request.POST.get('next', ''))
+
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
@@ -77,10 +90,11 @@ def edit(request, id):
             task.deadline = form.cleaned_data['deadline']
             task.priority = form.cleaned_data['priority']
             task.save()
-        return HttpResponseRedirect(f'/tasks/task/{id}/')
+        task_url = reverse('tasks:task', args=[id])
+        return HttpResponseRedirect(f'{task_url}?{urlencode({"next": next_url})}')
     else:
         form = TaskForm(model_to_dict(task))
-        return render(request, 'tasks/edit.html', {'form': form, 'task': task})
+        return render(request, 'tasks/edit.html', {'form': form, 'task': task, 'next': next_url})
     
 @login_required
 @require_POST
