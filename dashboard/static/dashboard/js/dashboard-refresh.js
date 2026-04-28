@@ -89,6 +89,7 @@
             form.className = 'dashboard-task-toggle';
             form.method = 'post';
             form.action = replaceIdInPath(options.taskToggleTemplate, task.id);
+            form.dataset.ajaxUrl = replaceIdInPath(options.taskToggleAjaxTemplate, task.id);
 
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -104,7 +105,6 @@
             checkbox.type = 'checkbox';
             checkbox.name = 'status';
             checkbox.checked = Boolean(task.status);
-            checkbox.setAttribute('onchange', 'this.form.submit()');
 
             form.append(csrfInput, nextInput, checkbox);
 
@@ -159,10 +159,11 @@
 
         const apiUrl = root.dataset.statsApiUrl;
         const taskToggleTemplate = root.dataset.taskToggleTemplate;
+        const taskToggleAjaxTemplate = root.dataset.taskToggleAjaxTemplate;
         const taskDetailTemplate = root.dataset.taskDetailTemplate;
         const noteDetailTemplate = root.dataset.noteDetailTemplate;
 
-        if (!apiUrl || !taskToggleTemplate || !taskDetailTemplate || !noteDetailTemplate) {
+        if (!apiUrl || !taskToggleTemplate || !taskToggleAjaxTemplate || !taskDetailTemplate || !noteDetailTemplate) {
             return;
         }
 
@@ -189,6 +190,7 @@
                 renderStats(statsSection, data);
                 renderUpcomingTasks(tasksSection, data.upcoming_tasks, {
                     taskToggleTemplate: taskToggleTemplate,
+                    taskToggleAjaxTemplate: taskToggleAjaxTemplate,
                     taskDetailTemplate: taskDetailTemplate,
                 });
                 renderRecentNotes(notesSection, data.recent_notes, {
@@ -204,6 +206,35 @@
 
         refresh();
         setInterval(refresh, 60000);
+
+        tasksSection.addEventListener('change', async function (event) {
+            const checkbox = event.target;
+            if (!(checkbox instanceof HTMLInputElement) || checkbox.type !== 'checkbox') {
+                return;
+            }
+
+            const form = checkbox.closest('.dashboard-task-toggle');
+            if (!form || !form.dataset.ajaxUrl) {
+                return;
+            }
+
+            const previousChecked = !checkbox.checked;
+            checkbox.disabled = true;
+            ajax.renderLoading(root, 'updating task...');
+
+            try {
+                await ajax.requestJson(form.dataset.ajaxUrl, {
+                    method: 'POST',
+                    data: { status: checkbox.checked ? 'true' : 'false' },
+                });
+                await refresh();
+            } catch (error) {
+                checkbox.checked = previousChecked;
+                ajax.renderError(root, 'failed to update task');
+            } finally {
+                checkbox.disabled = false;
+            }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', initDashboardRefresh);
