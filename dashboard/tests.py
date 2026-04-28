@@ -53,12 +53,13 @@ class DashboardNotesContextTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         recent_notes = list(response.context['recent_notes'])
+        recent_note_ids = [item['id'] for item in recent_notes]
+        recent_note_labels = [item['label'] for item in recent_notes]
 
         self.assertEqual(len(recent_notes), 3)
-        self.assertEqual([n.label for n in recent_notes], [own_newest.label, own_middle.label, own_older.label])
-        self.assertNotIn(own_oldest, recent_notes)
-        self.assertNotIn(other_newest, recent_notes)
-        self.assertTrue(all(n.user_id == self.user.id for n in recent_notes))
+        self.assertEqual(recent_note_labels, [own_newest.label, own_middle.label, own_older.label])
+        self.assertNotIn(own_oldest.id, recent_note_ids)
+        self.assertNotIn(other_newest.id, recent_note_ids)
 
 
 class DashboardTasksContextTests(TestCase):
@@ -85,13 +86,15 @@ class DashboardTasksContextTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         upcoming_tasks = list(response.context['upcoming_tasks'])
+        upcoming_task_ids = [item['id'] for item in upcoming_tasks]
+        upcoming_task_labels = [item['label'] for item in upcoming_tasks]
 
         self.assertEqual(len(upcoming_tasks), 3)
-        self.assertEqual([t.label for t in upcoming_tasks], [own_near.label, own_middle.label, own_far.label])
-        self.assertNotIn(own_extra, upcoming_tasks)
-        self.assertTrue(all(t.user_id == self.user.id for t in upcoming_tasks))
-        self.assertTrue(all(t.status is False for t in upcoming_tasks))
-        self.assertTrue(all(t.deadline >= timezone.now() for t in upcoming_tasks))
+        self.assertEqual(upcoming_task_labels, [own_near.label, own_middle.label, own_far.label])
+        self.assertNotIn(own_extra.id, upcoming_task_ids)
+        self.assertNotIn('Own completed', upcoming_task_labels)
+        self.assertNotIn('Own past', upcoming_task_labels)
+        self.assertNotIn('Other near', upcoming_task_labels)
 
 
 class DashboardStatisticsTests(TestCase):
@@ -154,6 +157,7 @@ class DashboardAjaxEndpointsTests(TestCase):
             user=user,
             label=label,
             description='Task description',
+            priority=1,
             deadline=timezone.now() + timedelta(days=deadline_delta_days),
             status=status,
         )

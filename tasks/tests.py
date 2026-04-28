@@ -324,6 +324,7 @@ class TasksAjaxEndpointsTests(TestCase):
             user=user,
             label=label,
             description='Task description',
+            priority=1,
             deadline=timezone.now() + timedelta(days=deadline_delta_days),
             status=status,
         )
