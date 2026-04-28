@@ -335,7 +335,7 @@ class TasksAjaxEndpointsTests(TestCase):
         self.assertIn(reverse('users:login'), response.url)
 
     def test_tasks_filter_ajax_requires_auth(self):
-        response = self.client.get(self.filter_url, {'completed': '1'})
+        response = self.client.get(self.filter_url, {'show': 'completed'})
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse('users:login'), response.url)
 
@@ -364,7 +364,7 @@ class TasksAjaxEndpointsTests(TestCase):
         self._create_task(self.user, label='Own active', status=False)
         self._create_task(self.other_user, label='Other completed', status=True)
         self.client.login(username='tasks_ajax_owner', password='testpass123')
-        response = self.client.get(self.filter_url, {'completed': '1'})
+        response = self.client.get(self.filter_url, {'show': 'completed'})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertIn('tasks', payload)
@@ -383,13 +383,13 @@ class TasksAjaxEndpointsTests(TestCase):
     def test_toggle_status_ajax_updates_own_task_and_returns_json(self):
         task = self._create_task(self.user, label='Toggle me', status=False)
         self.client.login(username='tasks_ajax_owner', password='testpass123')
-        response = self.client.post(reverse('tasks:toggle_status_ajax', args=[task.id]))
+        response = self.client.post(reverse('tasks:toggle_status_ajax', args=[task.id]), data={'status': 'true'})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertIn('task_id', payload)
+        self.assertIn('id', payload)
         self.assertIn('status', payload)
-        self.assertEqual(payload['task_id'], task.id)
+        self.assertEqual(payload['id'], task.id)
         task.refresh_from_db()
         self.assertEqual(task.status, payload['status'])
-        if task.status:
-            self.assertIsNotNone(task.completed_at)
+        self.assertTrue(task.status)
+        self.assertIsNotNone(task.completed_at)
