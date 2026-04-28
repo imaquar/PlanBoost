@@ -310,3 +310,85 @@ class TaskStatisticsTests(TestCase):
 
         self.assertEqual(stats['today_done_count'], 0)
         self.assertEqual(stats['last_7_days_done_counts'], [0, 0, 0, 0, 0, 0, 0])
+
+
+class TasksAjaxEndpointsTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='tasks_ajax_owner', password='testpass123')
+        self.other_user = get_user_model().objects.create_user(username='tasks_ajax_other', password='testpass123')
+        self.list_url = reverse('tasks:tasks_list_ajax')
+        self.filter_url = reverse('tasks:tasks_filter_ajax')
+
+    def _create_task(self, user, label='Task', status=False, deadline_delta_days=1):
+        return Task.objects.create(
+            user=user,
+            label=label,
+            description='Task description',
+            deadline=timezone.now() + timedelta(days=deadline_delta_days),
+            status=status,
+        )
+
+    def test_tasks_list_ajax_requires_auth(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('users:login'), response.url)
+
+    def test_tasks_filter_ajax_requires_auth(self):
+        response = self.client.get(self.filter_url, {'completed': '1'})
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('users:login'), response.url)
+
+    def test_toggle_status_ajax_requires_auth(self):
+        task = self._create_task(self.user, label='Need auth')
+        response = self.client.post(reverse('tasks:toggle_status_ajax', args=[task.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('users:login'), response.url)
+
+    def test_tasks_list_ajax_returns_only_current_user_tasks(self):
+        own_task = self._create_task(self.user, label='Own task')
+        self._create_task(self.other_user, label='Other task')
+        self.client.login(username='tasks_ajax_owner', password='testpass123')
+        response = self.client.get(self.list_url, {'sort': 'deadline'})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn('tasks', payload)
+        self.assertEqual(len(payload['tasks']), 1)
+        self.assertEqual(payload['tasks'][0]['id'], own_task.id)
+        self.assertEqual(payload['tasks'][0]['label'], own_task.label)
+        self.assertIn('deadline', payload['tasks'][0])
+        self.assertIn('status', payload['tasks'][0])
+
+    def test_tasks_filter_ajax_returns_only_current_user_selected_status(self):
+        own_completed = self._create_task(self.user, label='Own completed', status=True)
+        self._create_task(self.user, label='Own active', status=False)
+        self._create_task(self.other_user, label='Other completed', status=True)
+        self.client.login(username='tasks_ajax_owner', password='testpass123')
+        response = self.client.get(self.filter_url, {'completed': '1'})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn('tasks', payload)
+        self.assertEqual(len(payload['tasks']), 1)
+        self.assertEqual(payload['tasks'][0]['id'], own_completed.id)
+        self.assertTrue(payload['tasks'][0]['status'])
+
+    def test_toggle_status_ajax_blocks_access_to_foreign_task(self):
+        foreign_task = self._create_task(self.other_user, label='Foreign task', status=False)
+        self.client.login(username='tasks_ajax_owner', password='testpass123')
+        response = self.client.post(reverse('tasks:toggle_status_ajax', args=[foreign_task.id]))
+        self.assertEqual(response.status_code, 404)
+        foreign_task.refresh_from_db()
+        self.assertFalse(foreign_task.status)
+
+    def test_toggle_status_ajax_updates_own_task_and_returns_json(self):
+        task = self._create_task(self.user, label='Toggle me', status=False)
+        self.client.login(username='tasks_ajax_owner', password='testpass123')
+        response = self.client.post(reverse('tasks:toggle_status_ajax', args=[task.id]))
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn('task_id', payload)
+        self.assertIn('status', payload)
+        self.assertEqual(payload['task_id'], task.id)
+        task.refresh_from_db()
+        self.assertEqual(task.status, payload['status'])
+        if task.status:
+            self.assertIsNotNone(task.completed_at)
