@@ -191,10 +191,11 @@ class TaskCompletionStatusTests(TestCase):
     def test_toggle_status_marks_task_completed_and_sets_completed_at(self):
         self.client.login(username='taskstatusowner', password='testpass123')
 
-        response = self.client.post(reverse('tasks:toggle_status', args=[self.task.id]), data={'status': 'on'})
+        response = self.client.post(reverse('tasks:toggle_status_ajax', args=[self.task.id]), data={'status': 'true'})
 
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('tasks:tasks'))
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload['status'])
 
         self.task.refresh_from_db()
         self.assertTrue(self.task.status)
@@ -206,10 +207,11 @@ class TaskCompletionStatusTests(TestCase):
         self.task.completed_at = timezone.now()
         self.task.save(update_fields=['status', 'completed_at'])
 
-        response = self.client.post(reverse('tasks:toggle_status', args=[self.task.id]), data={})
+        response = self.client.post(reverse('tasks:toggle_status_ajax', args=[self.task.id]), data={'status': 'false'})
 
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('tasks:tasks'))
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertFalse(payload['status'])
 
         self.task.refresh_from_db()
         self.assertFalse(self.task.status)

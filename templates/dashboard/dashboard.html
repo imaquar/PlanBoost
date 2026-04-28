@@ -3,9 +3,9 @@
 {% block title %}PlanBoost{% endblock title %}
 {% block body_class %}dashboard-page{% endblock body_class %}
 {% block title_h1 %}Dashboard{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=11">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=12">{% endblock css %}
 {% block content %}
-<div class="dashboard-layout" data-stats-api-url="{% url 'dashboard:stats_ajax' %}" data-task-toggle-template="{% url 'tasks:toggle_status' 0 %}" data-task-toggle-ajax-template="{% url 'tasks:toggle_status_ajax' 0 %}" data-task-detail-template="{% url 'tasks:task' 0 %}" data-note-detail-template="{% url 'notes:note' 0 %}">
+<div class="dashboard-layout" data-stats-api-url="{% url 'dashboard:stats_ajax' %}" data-task-toggle-ajax-template="{% url 'tasks:toggle_status_ajax' 0 %}" data-task-detail-template="{% url 'tasks:task' 0 %}" data-note-detail-template="{% url 'notes:note' 0 %}">
     <section class="dashboard-section dashboard-stats-section">
         <h2>Productivity Stats</h2>
         <div class="dashboard-stats-cards">
@@ -34,7 +34,7 @@
             <ul class="dashboard-list dashboard-tasks-list">
                 {% for i in upcoming_tasks %}
                     <li class="dashboard-task-item dashboard-task-card">
-                        <form class="dashboard-task-toggle" method="post" action="{% url 'tasks:toggle_status' i.id %}" data-ajax-url="{% url 'tasks:toggle_status_ajax' i.id %}">
+                        <form class="dashboard-task-toggle" method="post" action="{% url 'tasks:toggle_status_ajax' i.id %}" data-ajax-url="{% url 'tasks:toggle_status_ajax' i.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.get_full_path }}">
                             <input type="checkbox" name="status">
@@ -65,5 +65,5 @@
         {% endif %}
     </section>
 </div>
-<script src="{% static 'dashboard/js/dashboard-refresh.js' %}?v=5"></script>
+<script src="{% static 'dashboard/js/dashboard-refresh.js' %}?v=6"></script>
 {% endblock content %}

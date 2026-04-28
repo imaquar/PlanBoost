@@ -88,7 +88,7 @@
             const form = document.createElement('form');
             form.className = 'dashboard-task-toggle';
             form.method = 'post';
-            form.action = replaceIdInPath(options.taskToggleTemplate, task.id);
+            form.action = replaceIdInPath(options.taskToggleAjaxTemplate, task.id);
             form.dataset.ajaxUrl = replaceIdInPath(options.taskToggleAjaxTemplate, task.id);
 
             const csrfInput = document.createElement('input');
@@ -158,12 +158,11 @@
         }
 
         const apiUrl = root.dataset.statsApiUrl;
-        const taskToggleTemplate = root.dataset.taskToggleTemplate;
         const taskToggleAjaxTemplate = root.dataset.taskToggleAjaxTemplate;
         const taskDetailTemplate = root.dataset.taskDetailTemplate;
         const noteDetailTemplate = root.dataset.noteDetailTemplate;
 
-        if (!apiUrl || !taskToggleTemplate || !taskToggleAjaxTemplate || !taskDetailTemplate || !noteDetailTemplate) {
+        if (!apiUrl || !taskToggleAjaxTemplate || !taskDetailTemplate || !noteDetailTemplate) {
             return;
         }
 
@@ -192,7 +191,6 @@
                 const data = await ajax.requestJson(apiUrl, { method: 'GET', csrf: false });
                 renderStats(statsSection, data);
                 renderUpcomingTasks(tasksSection, data.upcoming_tasks, {
-                    taskToggleTemplate: taskToggleTemplate,
                     taskToggleAjaxTemplate: taskToggleAjaxTemplate,
                     taskDetailTemplate: taskDetailTemplate,
                 });

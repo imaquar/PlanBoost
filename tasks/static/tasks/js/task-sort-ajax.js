@@ -64,14 +64,13 @@
         const row = document.createElement('li');
         row.className = 'tasks-list-item';
 
-        const toggleUrl = replaceIdInPath(options.toggleTemplate, task.id);
         const toggleAjaxUrl = replaceIdInPath(options.toggleAjaxTemplate, task.id);
         const detailUrl = replaceIdInPath(options.taskDetailTemplate, task.id);
 
         const form = document.createElement('form');
         form.className = 'tasks-toggle-form';
         form.method = 'post';
-        form.action = toggleUrl;
+        form.action = toggleAjaxUrl;
         form.dataset.ajaxUrl = toggleAjaxUrl;
 
         const csrfInput = document.createElement('input');
@@ -184,7 +183,6 @@
         renderTasks(listLayout, data, {
             csrfToken: options.csrfToken,
             showCompleted: Boolean(data.show_completed),
-            toggleTemplate: options.toggleTemplate,
             toggleAjaxTemplate: options.toggleAjaxTemplate,
             taskDetailTemplate: options.taskDetailTemplate,
         });
@@ -212,12 +210,11 @@
 
         const listApiUrl = listLayout.dataset.listApiUrl;
         const filterApiUrl = listLayout.dataset.filterApiUrl;
-        const toggleTemplate = listLayout.dataset.toggleTemplate;
         const toggleAjaxTemplate = listLayout.dataset.toggleAjaxTemplate;
         const taskDetailTemplate = listLayout.dataset.taskDetailTemplate;
         const csrfToken = ajax.getCsrfToken();
 
-        if (!listApiUrl || !filterApiUrl || !toggleTemplate || !toggleAjaxTemplate || !taskDetailTemplate) {
+        if (!listApiUrl || !filterApiUrl || !toggleAjaxTemplate || !taskDetailTemplate) {
             return;
         }
 
@@ -246,7 +243,6 @@
                     showCompleted,
                     {
                         csrfToken: csrfToken,
-                        toggleTemplate: toggleTemplate,
                         toggleAjaxTemplate: toggleAjaxTemplate,
                         taskDetailTemplate: taskDetailTemplate,
                     }
