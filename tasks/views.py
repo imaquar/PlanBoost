@@ -108,13 +108,8 @@ def toggle_status_ajax(request, id):
     })
 
 
-@login_required
-@require_GET
-def tasks_list_ajax(request):
-    sort = request.GET.get('sort', 'deadline')
-    show_completed = request.GET.get('show') == 'completed'
-
-    qs = Task.objects.filter(user=request.user, status=show_completed)
+def _tasks_payload(user, sort, show_completed):
+    qs = Task.objects.filter(user=user, status=show_completed)
     if sort == 'priority':
         qs = qs.order_by('-priority', 'deadline')
     else:
@@ -145,12 +140,28 @@ def tasks_list_ajax(request):
             'completed_at_display': completed_display,
         })
 
-    return JsonResponse({
+    return {
         'ok': True,
         'sort': sort,
         'show_completed': show_completed,
         'tasks': tasks,
-    })
+    }
+
+
+@login_required
+@require_GET
+def tasks_list_ajax(request):
+    sort = request.GET.get('sort', 'deadline')
+    show_completed = request.GET.get('show') == 'completed'
+    return JsonResponse(_tasks_payload(request.user, sort, show_completed))
+
+
+@login_required
+@require_GET
+def tasks_filter_ajax(request):
+    show_completed = request.GET.get('show') == 'completed'
+    sort = request.GET.get('sort', 'deadline')
+    return JsonResponse(_tasks_payload(request.user, sort, show_completed))
 
 @login_required
 @require_GET
