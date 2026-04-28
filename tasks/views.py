@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from urllib.parse import urlparse
 from .services import get_task_completion_stats
 
 @login_required
@@ -26,7 +27,20 @@ def task(request, id):
         task = Task.objects.get(id=id, user=request.user)
     except Task.DoesNotExist:
         return HttpResponseNotFound('<h2>Task not found</h2>')
-    next_url = request.GET.get('next', '')
+
+    next_url = request.GET.get('next', '').strip()
+    if not next_url:
+        referer = request.META.get('HTTP_REFERER', '').strip()
+        if referer:
+            parsed = urlparse(referer)
+            if parsed.path.startswith('/tasks/'):
+                next_url = parsed.path
+                if parsed.query:
+                    next_url += '?' + parsed.query
+
+    if not next_url.startswith('/tasks/'):
+        next_url = '/tasks/'
+
     return render(request, 'tasks/task.html', {'task' : task, 'next': next_url})
 
 @login_required
