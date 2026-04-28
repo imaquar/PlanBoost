@@ -20,15 +20,6 @@
         sortTrigger.setAttribute('aria-expanded', 'false');
     }
 
-    function setActiveSort(sort) {
-        const links = document.querySelectorAll('.tasks-sort-link');
-        links.forEach(function (link) {
-            const linkUrl = new URL(link.href, window.location.origin);
-            const linkSort = linkUrl.searchParams.get('sort') || 'deadline';
-            link.classList.toggle('is-active', linkSort === sort);
-        });
-    }
-
     function ensureListNode(listLayout) {
         let list = listLayout.querySelector('.tasks-list');
         if (list) {
@@ -135,73 +126,155 @@
         });
     }
 
-    function initTaskSortAjax() {
+    function setActiveSort(sort) {
+        const links = document.querySelectorAll('.tasks-sort-link');
+        links.forEach(function (link) {
+            const linkUrl = new URL(link.href, window.location.origin);
+            const linkSort = linkUrl.searchParams.get('sort') || 'deadline';
+            link.classList.toggle('is-active', linkSort === sort);
+        });
+    }
+
+    function setActiveFilter(showCompleted) {
+        const links = document.querySelectorAll('.tasks-switch-link');
+        links.forEach(function (link) {
+            const linkUrl = new URL(link.href, window.location.origin);
+            const linkShowCompleted = linkUrl.searchParams.get('show') === 'completed';
+            link.classList.toggle('is-active', linkShowCompleted === showCompleted);
+        });
+    }
+
+    function refreshControlUrls(listLayout) {
+        const sort = listLayout.dataset.currentSort || 'deadline';
+        const showCompleted = listLayout.dataset.showCompleted === '1';
+        const basePath = window.location.pathname;
+
+        const filterLinks = document.querySelectorAll('.tasks-switch-link');
+        filterLinks.forEach(function (link) {
+            const target = new URL(link.href, window.location.origin);
+            const targetShowCompleted = target.searchParams.get('show') === 'completed';
+            const params = new URLSearchParams();
+            if (targetShowCompleted) {
+                params.set('show', 'completed');
+            }
+            params.set('sort', sort);
+            link.href = basePath + '?' + params.toString();
+        });
+
+        const sortLinks = document.querySelectorAll('.tasks-sort-link');
+        sortLinks.forEach(function (link) {
+            const target = new URL(link.href, window.location.origin);
+            const targetSort = target.searchParams.get('sort') || 'deadline';
+            const params = new URLSearchParams();
+            if (showCompleted) {
+                params.set('show', 'completed');
+            }
+            params.set('sort', targetSort);
+            link.href = basePath + '?' + params.toString();
+        });
+    }
+
+    async function fetchAndRender(listLayout, endpointUrl, sort, showCompleted, options) {
+        const fetchUrl = new URL(endpointUrl, window.location.origin);
+        fetchUrl.searchParams.set('sort', sort || 'deadline');
+        if (showCompleted) {
+            fetchUrl.searchParams.set('show', 'completed');
+        }
+
+        const response = await fetch(fetchUrl.toString(), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        });
+
+        if (!response.ok) {
+            throw new Error('Request failed');
+        }
+
+        const data = await response.json();
+
+        listLayout.dataset.showCompleted = data.show_completed ? '1' : '0';
+        listLayout.dataset.currentSort = data.sort || sort || 'deadline';
+
+        renderTasks(listLayout, data, {
+            csrfToken: options.csrfToken,
+            showCompleted: Boolean(data.show_completed),
+            toggleTemplate: options.toggleTemplate,
+            toggleAjaxTemplate: options.toggleAjaxTemplate,
+            taskDetailTemplate: options.taskDetailTemplate,
+        });
+
+        setActiveSort(listLayout.dataset.currentSort);
+        setActiveFilter(listLayout.dataset.showCompleted === '1');
+        refreshControlUrls(listLayout);
+
+        closeSortMenu();
+
+        const params = new URLSearchParams();
+        if (listLayout.dataset.showCompleted === '1') {
+            params.set('show', 'completed');
+        }
+        params.set('sort', listLayout.dataset.currentSort);
+        history.replaceState(null, '', window.location.pathname + '?' + params.toString());
+    }
+
+    function initTaskSortFilterAjax() {
         const listLayout = document.querySelector('.tasks-list-layout');
         if (!listLayout) {
             return;
         }
 
-        const apiUrl = listLayout.dataset.listApiUrl;
+        const listApiUrl = listLayout.dataset.listApiUrl;
+        const filterApiUrl = listLayout.dataset.filterApiUrl;
         const toggleTemplate = listLayout.dataset.toggleTemplate;
         const toggleAjaxTemplate = listLayout.dataset.toggleAjaxTemplate;
         const taskDetailTemplate = listLayout.dataset.taskDetailTemplate;
         const csrfToken = getCookie('csrftoken');
 
-        if (!apiUrl || !toggleTemplate || !toggleAjaxTemplate || !taskDetailTemplate) {
+        if (!listApiUrl || !filterApiUrl || !toggleTemplate || !toggleAjaxTemplate || !taskDetailTemplate) {
             return;
         }
 
         document.addEventListener('click', async function (event) {
-            const link = event.target.closest('.tasks-sort-link');
-            if (!link) {
+            const sortLink = event.target.closest('.tasks-sort-link');
+            const filterLink = event.target.closest('.tasks-switch-link');
+
+            if (!sortLink && !filterLink) {
                 return;
             }
 
             event.preventDefault();
 
+            const isSortAction = Boolean(sortLink);
+            const sourceLink = sortLink || filterLink;
+
             try {
-                const targetUrl = new URL(link.href, window.location.origin);
-                const sort = targetUrl.searchParams.get('sort') || 'deadline';
+                const targetUrl = new URL(sourceLink.href, window.location.origin);
+                const sort = targetUrl.searchParams.get('sort') || (listLayout.dataset.currentSort || 'deadline');
                 const showCompleted = targetUrl.searchParams.get('show') === 'completed';
 
-                const fetchUrl = new URL(apiUrl, window.location.origin);
-                fetchUrl.searchParams.set('sort', sort);
-                if (showCompleted) {
-                    fetchUrl.searchParams.set('show', 'completed');
-                }
-
-                const response = await fetch(fetchUrl.toString(), {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    credentials: 'same-origin',
-                });
-
-                if (!response.ok) {
-                    throw new Error('Sort request failed');
-                }
-
-                const data = await response.json();
-                listLayout.dataset.showCompleted = data.show_completed ? '1' : '0';
-
-                renderTasks(listLayout, data, {
-                    csrfToken: csrfToken,
-                    showCompleted: Boolean(data.show_completed),
-                    toggleTemplate: toggleTemplate,
-                    toggleAjaxTemplate: toggleAjaxTemplate,
-                    taskDetailTemplate: taskDetailTemplate,
-                });
-
-                setActiveSort(data.sort || sort);
-                closeSortMenu();
-                history.replaceState(null, '', targetUrl.pathname + targetUrl.search);
+                await fetchAndRender(
+                    listLayout,
+                    isSortAction ? listApiUrl : filterApiUrl,
+                    sort,
+                    showCompleted,
+                    {
+                        csrfToken: csrfToken,
+                        toggleTemplate: toggleTemplate,
+                        toggleAjaxTemplate: toggleAjaxTemplate,
+                        taskDetailTemplate: taskDetailTemplate,
+                    }
+                );
             } catch (error) {
-                window.location.assign(link.href);
+                window.location.assign(sourceLink.href);
             }
         });
+
+        refreshControlUrls(listLayout);
     }
 
-    document.addEventListener('DOMContentLoaded', initTaskSortAjax);
+    document.addEventListener('DOMContentLoaded', initTaskSortFilterAjax);
 })();

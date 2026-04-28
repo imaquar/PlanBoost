@@ -47,7 +47,6 @@
             return;
         }
 
-        const showCompleted = listLayout.dataset.showCompleted === '1';
         const csrfToken = getCookie('csrftoken');
 
         listLayout.addEventListener('change', async function (event) {
@@ -95,6 +94,8 @@
 
                 const data = await response.json();
                 checkbox.checked = Boolean(data.status);
+
+                const showCompleted = listLayout.dataset.showCompleted === '1';
 
                 if (checkbox.checked !== showCompleted) {
                     row.remove();
