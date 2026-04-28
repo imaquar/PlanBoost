@@ -5,18 +5,18 @@
 {% block title_h1 %}Dashboard{% endblock title_h1 %}
 {% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=9">{% endblock css %}
 {% block content %}
-<div class="dashboard-layout">
+<div class="dashboard-layout" data-stats-api-url="{% url 'dashboard:stats_ajax' %}" data-task-toggle-template="{% url 'tasks:toggle_status' 0 %}" data-task-detail-template="{% url 'tasks:task' 0 %}" data-note-detail-template="{% url 'notes:note' 0 %}">
     <section class="dashboard-section dashboard-stats-section">
         <h2>Productivity Stats</h2>
         <div class="dashboard-stats-cards">
             <article class="dashboard-stat-card">
                 <h3>Done today</h3>
-                <p class="dashboard-stat-value">{{ today_done_count }}</p>
+                <p class="dashboard-stat-value" id="dashboard-today-value">{{ today_done_count }}</p>
             </article>
 
             <article class="dashboard-stat-card dashboard-stat-chart-card">
                 <h3>Last 7 days</h3>
-                <div class="stats-chart">
+                <div class="stats-chart" id="dashboard-last7-chart">
                     {% for count in last_7_days_done_counts %}
                         <div class="stats-bar-wrap">
                             <div class="stats-bar" style="--count: {{ count }};"></div>
@@ -65,4 +65,5 @@
         {% endif %}
     </section>
 </div>
+<script src="{% static 'dashboard/js/dashboard-refresh.js' %}?v=2"></script>
 {% endblock content %}

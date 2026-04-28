@@ -1,0 +1,228 @@
+(function () {
+    function getCookie(name) {
+        const escapedName = name.replace(/[-.]/g, '\\$&');
+        const match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function replaceIdInPath(template, id) {
+        return template.replace('/0/', '/' + id + '/');
+    }
+
+    function ensureList(sectionElement, listClass) {
+        let list = sectionElement.querySelector('.' + listClass);
+        if (list) {
+            return list;
+        }
+
+        list = document.createElement('ul');
+        list.className = 'dashboard-list ' + listClass;
+        sectionElement.appendChild(list);
+        return list;
+    }
+
+    function renderEmpty(sectionElement, text) {
+        const existingList = sectionElement.querySelector('.dashboard-list');
+        if (existingList) {
+            existingList.remove();
+        }
+
+        let empty = sectionElement.querySelector('.dashboard-empty');
+        if (!empty) {
+            empty = document.createElement('p');
+            empty.className = 'dashboard-empty';
+            sectionElement.appendChild(empty);
+        }
+        empty.textContent = text;
+    }
+
+    function clearEmpty(sectionElement) {
+        const empty = sectionElement.querySelector('.dashboard-empty');
+        if (empty) {
+            empty.remove();
+        }
+    }
+
+    function renderStats(sectionElement, data) {
+        const todayValue = sectionElement.querySelector('#dashboard-today-value');
+        if (todayValue) {
+            todayValue.textContent = String(data.today ?? 0);
+        }
+
+        const chart = sectionElement.querySelector('#dashboard-last7-chart');
+        if (!chart) {
+            return;
+        }
+
+        const values = Array.isArray(data.last7) ? data.last7 : [];
+        chart.replaceChildren();
+
+        values.forEach(function (count) {
+            const wrap = document.createElement('div');
+            wrap.className = 'stats-bar-wrap';
+
+            const bar = document.createElement('div');
+            bar.className = 'stats-bar';
+            bar.style.setProperty('--count', String(count));
+
+            const label = document.createElement('div');
+            label.className = 'stats-bar-value';
+            label.textContent = String(count);
+
+            wrap.append(bar, label);
+            chart.appendChild(wrap);
+        });
+    }
+
+    function renderUpcomingTasks(sectionElement, tasks, options) {
+        if (!Array.isArray(tasks) || tasks.length === 0) {
+            renderEmpty(sectionElement, 'no upcoming tasks');
+            return;
+        }
+
+        clearEmpty(sectionElement);
+        const list = ensureList(sectionElement, 'dashboard-tasks-list');
+        list.replaceChildren();
+
+        const csrfToken = getCookie('csrftoken');
+
+        tasks.forEach(function (task) {
+            const item = document.createElement('li');
+            item.className = 'dashboard-task-item dashboard-task-card';
+
+            const form = document.createElement('form');
+            form.className = 'dashboard-task-toggle';
+            form.method = 'post';
+            form.action = replaceIdInPath(options.taskToggleTemplate, task.id);
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+
+            const nextInput = document.createElement('input');
+            nextInput.type = 'hidden';
+            nextInput.name = 'next';
+            nextInput.value = window.location.pathname + window.location.search;
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'status';
+            checkbox.checked = Boolean(task.status);
+            checkbox.setAttribute('onchange', 'this.form.submit()');
+
+            form.append(csrfInput, nextInput, checkbox);
+
+            const link = document.createElement('a');
+            link.className = 'dashboard-task-link';
+            link.href = replaceIdInPath(options.taskDetailTemplate, task.id);
+            link.textContent = task.label || '';
+
+            const deadline = document.createElement('span');
+            deadline.className = 'dashboard-task-deadline';
+            deadline.textContent = task.deadline_display || '';
+
+            item.append(form, link, deadline);
+            list.appendChild(item);
+        });
+    }
+
+    function renderRecentNotes(sectionElement, notes, options) {
+        if (!Array.isArray(notes) || notes.length === 0) {
+            renderEmpty(sectionElement, 'no recent notes');
+            return;
+        }
+
+        clearEmpty(sectionElement);
+        const list = ensureList(sectionElement, 'dashboard-notes-list');
+        list.replaceChildren();
+
+        notes.forEach(function (note) {
+            const item = document.createElement('li');
+            item.className = 'dashboard-note-card';
+
+            const link = document.createElement('a');
+            link.className = 'dashboard-note-link';
+            link.href = replaceIdInPath(options.noteDetailTemplate, note.id);
+            link.textContent = note.label || '';
+
+            const created = document.createElement('span');
+            created.className = 'dashboard-note-created';
+            created.textContent = note.created_at_display || '';
+
+            item.append(link, created);
+            list.appendChild(item);
+        });
+    }
+
+    async function fetchDashboardData(apiUrl) {
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        });
+
+        if (!response.ok) {
+            throw new Error('Dashboard refresh failed');
+        }
+
+        return response.json();
+    }
+
+    function initDashboardRefresh() {
+        const root = document.querySelector('.dashboard-layout');
+        if (!root) {
+            return;
+        }
+
+        const apiUrl = root.dataset.statsApiUrl;
+        const taskToggleTemplate = root.dataset.taskToggleTemplate;
+        const taskDetailTemplate = root.dataset.taskDetailTemplate;
+        const noteDetailTemplate = root.dataset.noteDetailTemplate;
+
+        if (!apiUrl || !taskToggleTemplate || !taskDetailTemplate || !noteDetailTemplate) {
+            return;
+        }
+
+        const statsSection = root.querySelector('.dashboard-stats-section');
+        const tasksSection = root.querySelector('.dashboard-tasks-section');
+        const notesSection = root.querySelector('.dashboard-notes-section');
+
+        if (!statsSection || !tasksSection || !notesSection) {
+            return;
+        }
+
+        let busy = false;
+
+        async function refresh() {
+            if (busy) {
+                return;
+            }
+
+            busy = true;
+
+            try {
+                const data = await fetchDashboardData(apiUrl);
+                renderStats(statsSection, data);
+                renderUpcomingTasks(tasksSection, data.upcoming_tasks, {
+                    taskToggleTemplate: taskToggleTemplate,
+                    taskDetailTemplate: taskDetailTemplate,
+                });
+                renderRecentNotes(notesSection, data.recent_notes, {
+                    noteDetailTemplate: noteDetailTemplate,
+                });
+            } catch (error) {
+            } finally {
+                busy = false;
+            }
+        }
+
+        refresh();
+        setInterval(refresh, 60000);
+    }
+
+    document.addEventListener('DOMContentLoaded', initDashboardRefresh);
+})();
