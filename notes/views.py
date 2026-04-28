@@ -68,7 +68,9 @@ def edit(request, id):
             note.text = form.cleaned_data['text']
             note.save()
         note_url = reverse('notes:note', args=[id])
-        return HttpResponseRedirect(f'{note_url}?{urlencode({"next": next_url})}')
+        if next_url and next_url != '/notes/':
+            return HttpResponseRedirect(f'{note_url}?{urlencode({"next": next_url})}')
+        return HttpResponseRedirect(note_url)
     else:
         form = NoteForm(model_to_dict(note))
         return render(request, 'notes/edit.html', {'form': form, 'note': note, 'next': next_url})

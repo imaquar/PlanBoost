@@ -91,7 +91,9 @@ def edit(request, id):
             task.priority = form.cleaned_data['priority']
             task.save()
         task_url = reverse('tasks:task', args=[id])
-        return HttpResponseRedirect(f'{task_url}?{urlencode({"next": next_url})}')
+        if next_url and next_url != '/tasks/':
+            return HttpResponseRedirect(f'{task_url}?{urlencode({"next": next_url})}')
+        return HttpResponseRedirect(task_url)
     else:
         form = TaskForm(model_to_dict(task))
         return render(request, 'tasks/edit.html', {'form': form, 'task': task, 'next': next_url})
