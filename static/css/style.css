@@ -476,6 +476,26 @@ html[data-theme="dark"] .header-logo-button:active .header-logo-white {
     font-size: 0.95rem;
 }
 
+.ajax-status {
+    margin: 0 0 0.6rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--header-text);
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.ajax-status-loading {
+    color: var(--color-muted);
+}
+
+.ajax-status-error {
+    color: var(--color-danger);
+}
+
+
 @media (hover: none), (pointer: coarse) {
     .header-icon-button:hover,
     .header-menu-trigger:hover,

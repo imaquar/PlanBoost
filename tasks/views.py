@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from urllib.parse import urlparse
 from .services import get_task_completion_stats
 
 @login_required
@@ -26,7 +27,20 @@ def task(request, id):
         task = Task.objects.get(id=id, user=request.user)
     except Task.DoesNotExist:
         return HttpResponseNotFound('<h2>Task not found</h2>')
-    next_url = request.GET.get('next', '')
+
+    next_url = request.GET.get('next', '').strip()
+    if not next_url:
+        referer = request.META.get('HTTP_REFERER', '').strip()
+        if referer:
+            parsed = urlparse(referer)
+            if parsed.path.startswith('/tasks/'):
+                next_url = parsed.path
+                if parsed.query:
+                    next_url += '?' + parsed.query
+
+    if not next_url.startswith('/tasks/'):
+        next_url = '/tasks/'
+
     return render(request, 'tasks/task.html', {'task' : task, 'next': next_url})
 
 @login_required
@@ -80,13 +94,77 @@ def delete(request, id):
 
 @login_required
 @require_POST
-def toggle_status(request, id):
+def toggle_status_ajax(request, id):
     task = get_object_or_404(Task, id=id, user=request.user)
-    is_done = 'status' in request.POST
+    raw_status = request.POST.get('status')
+    is_done = str(raw_status).lower() in ('1', 'true', 'on', 'yes')
+
     task.status = is_done
     task.completed_at = timezone.now() if is_done else None
     task.save(update_fields=['status', 'completed_at'])
-    return redirect(request.POST.get('next') or 'tasks:tasks')
+
+    return JsonResponse({
+        'ok': True,
+        'id': task.id,
+        'status': task.status,
+        'completed_at': task.completed_at.isoformat() if task.completed_at else None,
+    })
+
+
+def _tasks_payload(user, sort, show_completed):
+    qs = Task.objects.filter(user=user, status=show_completed)
+    if sort == 'priority':
+        qs = qs.order_by('-priority', 'deadline')
+    else:
+        sort = 'deadline'
+        qs = qs.order_by('deadline')
+
+    tasks = []
+    for task in qs:
+        deadline_display = ''
+        if task.deadline:
+            deadline_value = timezone.localtime(task.deadline) if timezone.is_aware(task.deadline) else task.deadline
+            deadline_display = deadline_value.strftime('%d.%m.%y %H:%M')
+
+        completed_display = ''
+        if task.completed_at:
+            completed_value = timezone.localtime(task.completed_at) if timezone.is_aware(task.completed_at) else task.completed_at
+            completed_display = completed_value.strftime('%d.%m.%y %H:%M')
+
+        tasks.append({
+            'id': task.id,
+            'label': task.label,
+            'status': task.status,
+            'priority': task.priority,
+            'priority_display': task.get_priority_display(),
+            'deadline': task.deadline.isoformat() if task.deadline else None,
+            'deadline_display': deadline_display,
+            'completed_at': task.completed_at.isoformat() if task.completed_at else None,
+            'completed_at_display': completed_display,
+        })
+
+    return {
+        'ok': True,
+        'sort': sort,
+        'show_completed': show_completed,
+        'tasks': tasks,
+    }
+
+
+@login_required
+@require_GET
+def tasks_list_ajax(request):
+    sort = request.GET.get('sort', 'deadline')
+    show_completed = request.GET.get('show') == 'completed'
+    return JsonResponse(_tasks_payload(request.user, sort, show_completed))
+
+
+@login_required
+@require_GET
+def tasks_filter_ajax(request):
+    show_completed = request.GET.get('show') == 'completed'
+    sort = request.GET.get('sort', 'deadline')
+    return JsonResponse(_tasks_payload(request.user, sort, show_completed))
 
 @login_required
 @require_GET

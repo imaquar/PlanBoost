@@ -53,12 +53,13 @@ class DashboardNotesContextTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         recent_notes = list(response.context['recent_notes'])
+        recent_note_ids = [item['id'] for item in recent_notes]
+        recent_note_labels = [item['label'] for item in recent_notes]
 
         self.assertEqual(len(recent_notes), 3)
-        self.assertEqual([n.label for n in recent_notes], [own_newest.label, own_middle.label, own_older.label])
-        self.assertNotIn(own_oldest, recent_notes)
-        self.assertNotIn(other_newest, recent_notes)
-        self.assertTrue(all(n.user_id == self.user.id for n in recent_notes))
+        self.assertEqual(recent_note_labels, [own_newest.label, own_middle.label, own_older.label])
+        self.assertNotIn(own_oldest.id, recent_note_ids)
+        self.assertNotIn(other_newest.id, recent_note_ids)
 
 
 class DashboardTasksContextTests(TestCase):
@@ -85,13 +86,15 @@ class DashboardTasksContextTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         upcoming_tasks = list(response.context['upcoming_tasks'])
+        upcoming_task_ids = [item['id'] for item in upcoming_tasks]
+        upcoming_task_labels = [item['label'] for item in upcoming_tasks]
 
         self.assertEqual(len(upcoming_tasks), 3)
-        self.assertEqual([t.label for t in upcoming_tasks], [own_near.label, own_middle.label, own_far.label])
-        self.assertNotIn(own_extra, upcoming_tasks)
-        self.assertTrue(all(t.user_id == self.user.id for t in upcoming_tasks))
-        self.assertTrue(all(t.status is False for t in upcoming_tasks))
-        self.assertTrue(all(t.deadline >= timezone.now() for t in upcoming_tasks))
+        self.assertEqual(upcoming_task_labels, [own_near.label, own_middle.label, own_far.label])
+        self.assertNotIn(own_extra.id, upcoming_task_ids)
+        self.assertNotIn('Own completed', upcoming_task_labels)
+        self.assertNotIn('Own past', upcoming_task_labels)
+        self.assertNotIn('Other near', upcoming_task_labels)
 
 
 class DashboardStatisticsTests(TestCase):
@@ -138,3 +141,56 @@ class DashboardStatisticsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['today_done_count'], 0)
         self.assertEqual(response.context['last_7_days_done_counts'], [0, 0, 0, 0, 0, 0, 0])
+
+
+class DashboardAjaxEndpointsTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='dashboard_ajax_owner', password='testpass123')
+        self.other_user = get_user_model().objects.create_user(username='dashboard_ajax_other', password='testpass123')
+        self.url = reverse('dashboard:stats_ajax')
+
+    def _create_note(self, user, label='Note'):
+        return Note.objects.create(user=user, label=label, text='Note text')
+
+    def _create_task(self, user, label='Task', status=False, deadline_delta_days=1):
+        return Task.objects.create(
+            user=user,
+            label=label,
+            description='Task description',
+            priority=1,
+            deadline=timezone.now() + timedelta(days=deadline_delta_days),
+            status=status,
+        )
+
+    def test_dashboard_stats_ajax_requires_auth(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('users:login'), response.url)
+
+    def test_dashboard_stats_ajax_returns_only_current_user_data(self):
+        own_note = self._create_note(self.user, label='Own note')
+        own_task = self._create_task(self.user, label='Own upcoming', status=False, deadline_delta_days=1)
+        other_note = self._create_note(self.other_user, label='Other note')
+        other_task = self._create_task(self.other_user, label='Other upcoming', status=False, deadline_delta_days=1)
+        self.client.login(username='dashboard_ajax_owner', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn('today', payload)
+        self.assertIn('last7', payload)
+        self.assertIn('upcoming_tasks', payload)
+        self.assertIn('recent_notes', payload)
+        upcoming_ids = {item['id'] for item in payload['upcoming_tasks']}
+        notes_ids = {item['id'] for item in payload['recent_notes']}
+        self.assertIn(own_task.id, upcoming_ids)
+        self.assertIn(own_note.id, notes_ids)
+        self.assertNotIn(other_task.id, upcoming_ids)
+        self.assertNotIn(other_note.id, notes_ids)
+        for item in payload['upcoming_tasks']:
+            self.assertIn('id', item)
+            self.assertIn('label', item)
+            self.assertIn('deadline', item)
+        for item in payload['recent_notes']:
+            self.assertIn('id', item)
+            self.assertIn('label', item)
+            self.assertIn('created_at', item)

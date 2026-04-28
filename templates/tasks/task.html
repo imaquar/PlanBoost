@@ -3,15 +3,15 @@
 {% block title %}Tasks{% endblock title %}
 {% block body_class %}tasks-page tasks-detail-page{% endblock body_class %}
 {% block title_h1 %}{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=14">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}?v=16">{% endblock css %}
 {% block content %}
     <div class="tasks-detail-layout">
         <div class="tasks-detail-top-row">
-            <form class="tasks-detail-card tasks-detail-completed" method="post" action="{% url 'tasks:toggle_status' task.id %}">
+            <form class="tasks-detail-card tasks-detail-completed tasks-detail-toggle-form" method="post" action="{% url 'tasks:toggle_status_ajax' task.id %}" data-ajax-url="{% url 'tasks:toggle_status_ajax' task.id %}">
                 {% csrf_token %}
-                <input type="hidden" name="next" value="{% url 'tasks:tasks' %}">
+                <input type="hidden" name="next" value="{{ next|default:'' }}">
                 <label>
-                    <input type="checkbox" name="status" {% if task.status %}checked{% endif %} onchange="this.form.submit()">
+                    <input type="checkbox" name="status" {% if task.status %}checked{% endif %}>
                     completed
                 </label>
             </form>
@@ -38,4 +38,5 @@
             </form>
         </div>
     </div>
+<script src="{% static 'tasks/js/task-detail-toggle-ajax.js' %}?v=3"></script>
 {% endblock content %}
