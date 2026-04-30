@@ -3,7 +3,7 @@
 {% block title %}PlanBoost{% endblock title %}
 {% block body_class %}dashboard-page{% endblock body_class %}
 {% block title_h1 %}Dashboard{% endblock title_h1 %}
-{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=12">{% endblock css %}
+{% block css %}<link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=15">{% endblock css %}
 {% block content %}
 <div class="dashboard-layout" data-stats-api-url="{% url 'dashboard:stats_ajax' %}" data-task-toggle-ajax-template="{% url 'tasks:toggle_status_ajax' 0 %}" data-task-detail-template="{% url 'tasks:task' 0 %}" data-note-detail-template="{% url 'notes:note' 0 %}">
     <section class="dashboard-section dashboard-stats-section">
